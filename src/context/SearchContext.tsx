@@ -10,13 +10,14 @@
  */
 
 import React, { createContext, useContext, useMemo, useCallback, useEffect } from 'react';
-import { useForm, FieldValues as RHFFieldValues } from 'react-hook-form';
+import { useForm, FieldValues as RHFFieldValues, UseFormReturn, Unsubscribe } from 'react-hook-form';
 import {
   SearchContextValue,
   SearchProviderProps,
   SearchFormAPI,
   FieldMeta,
   FieldValues,
+  InternalAPI,
 } from '../types/search.types';
 
 /**
@@ -42,7 +43,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
   // 기본값 설정
   // initialValues와 필드별 defaultValue를 병합하여 최종 기본값 생성
   // 우선순위: initialValues > field.defaultValue
-  const defaultValues = useMemo(() => {
+  const defaultValues: FieldValues = useMemo(() => {
     const values: FieldValues = { ...initialValues };
     
     // 각 필드의 defaultValue가 있고, initialValues에 해당 값이 없으면 추가
@@ -57,7 +58,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
 
   // react-hook-form 초기화 (내부적으로만 사용)
   // 사용자는 이 rhfForm의 존재를 모르고, 우리가 제공하는 API만 사용
-  const rhfForm = useForm<RHFFieldValues>({
+  const rhfForm: UseFormReturn<RHFFieldValues> = useForm<RHFFieldValues>({
     defaultValues,
     mode: 'onChange', // 입력할 때마다 유효성 검사 (onBlur, onSubmit, all 옵션도 있음)
     // mode 옵션 설명:
@@ -162,26 +163,35 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
   // onChange 콜백 처리
   // 폼 값이 변경될 때마다 config.onChange 콜백 실행
   useEffect(() => {
-    if (config.onChange) {
-      // watch()는 구독을 반환하며, 값이 변경될 때마다 콜백 실행
-      const subscription = watch((data) => {
-        config.onChange!(data as FieldValues);
-      });
-      // 컴포넌트 언마운트 시 구독 해제
-      return () => subscription.unsubscribe();
+    // onChange가 정의되어 있지 않으면 early return
+    if (!config.onChange) {
+      return;
     }
+    
+    // watch()는 구독을 반환하며, 값이 변경될 때마다 콜백 실행
+    const subscription: Unsubscribe = watch((data) => {
+      config.onChange!(data as FieldValues);
+    });
+    
+    // 컴포넌트 언마운트 시 구독 해제
+    return () => subscription.unsubscribe();
   }, [watch, config]);
 
   // 자동 제출 처리
   // autoSubmit이 true면 값 변경 후 지정된 시간(기본 500ms) 후 자동 제출
   useEffect(() => {
-    if (config.autoSubmit) {
-      const delay = config.autoSubmitDelay ?? 500;
-      const timer = setTimeout(() => {
-        formAPI.submit();
-      }, delay);
-      return () => clearTimeout(timer);
+    // autoSubmit이 활성화되어 있지 않으면 early return
+    if (!config.autoSubmit) {
+      return;
     }
+    
+    const delay: number = config.autoSubmitDelay ?? 500;
+    const timer = setTimeout(() => {
+      formAPI.submit();
+    }, delay);
+    
+    // cleanup 함수로 타이머 정리
+    return () => clearTimeout(timer);
   }, [watch(), config.autoSubmit, config.autoSubmitDelay, formAPI]); // watch()를 의존성에 포함하여 값 변경 감지
 
   // Context 값
@@ -198,7 +208,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
         rhfForm,                     // react-hook-form 인스턴스
         control: rhfForm.control,    // Controller나 useController에서 사용
         register: rhfForm.register,  // register 메서드 (직접 사용은 권장하지 않음)
-      },
+      } as InternalAPI,
     }),
     [config, formAPI, getFieldMeta, rhfForm]
   );

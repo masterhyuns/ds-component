@@ -4,6 +4,7 @@
  */
 
 import { ReactNode, ComponentType } from 'react';
+import { Control, UseFormReturn, UseFormRegister } from 'react-hook-form';
 
 /**
  * 필드 값 타입 (제네릭)
@@ -259,6 +260,19 @@ export interface SearchFormAPI {
 }
 
 /**
+ * react-hook-form 내부 API 타입
+ * 사용자에게는 노출되지 않고 내부적으로만 사용
+ */
+export interface InternalAPI {
+  /** react-hook-form 인스턴스 */
+  rhfForm: UseFormReturn<FieldValues>;
+  /** react-hook-form control 객체 */
+  control: Control<FieldValues>;
+  /** react-hook-form register 함수 */
+  register: UseFormRegister<FieldValues>;
+}
+
+/**
  * 검색 컨텍스트 타입
  * Provider가 제공하는 전체 컨텍스트
  */
@@ -270,5 +284,5 @@ export interface SearchContextValue {
   /** 필드 메타 가져오기 */
   getFieldMeta: (name: string) => FieldMeta | undefined;
   /** 내부 API (사용자에게 노출 안함) */
-  _internal: any;
+  _internal: InternalAPI;
 }
