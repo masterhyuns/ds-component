@@ -114,6 +114,45 @@ const SwiperTabs: React.FC<SwiperTabsProps> = ({
       updateNavigationState();
     }
   }, [tabs.length]);
+  
+  // 마우스가 영역을 벗어났을 때 드래그 모드 해제
+  useEffect(() => {
+    const handleMouseLeave = () => {
+      if (swiperRef.current) {
+        // 드래그 상태 강제 해제
+        const swiper = swiperRef.current as any;
+        if (swiper.isDragging || swiper.isBeginning || swiper.touches?.current) {
+          swiper.touchEventsData = swiper.touchEventsData || {};
+          swiper.touchEventsData.isTouched = false;
+          swiper.touchEventsData.isMoved = false;
+          swiper.touches = {
+            startX: 0,
+            startY: 0,
+            currentX: 0,
+            currentY: 0,
+            diff: 0
+          };
+          swiper.setGrabCursor(false);
+          // 드래그 상태 플래그 해제
+          swiper.isDragging = false;
+          swiper.isBeginning = false;
+          swiper.isEnd = false;
+        }
+      }
+    };
+    
+    // Swiper 컨테이너에 이벤트 리스너 추가
+    const container = document.querySelector(`.${styles.swiperWrapper}`);
+    if (container) {
+      container.addEventListener('mouseleave', handleMouseLeave);
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, []);
 
   /**
    * 탭 클릭 핸들러
@@ -166,6 +205,7 @@ const SwiperTabs: React.FC<SwiperTabsProps> = ({
           speed={300} // 스크롤 애니메이션 속도
           allowTouchMove={true} // 터치/마우스 드래그 허용
           grabCursor={true} // 드래그 가능 커서 표시
+          touchEventsTarget={'container'} // 컨테이너 내에서만 터치 이벤트
           observer={true} // DOM 변경 감지 (동적 탭 추가/삭제용)
           observeParents={true} // 부모 요소 변경도 감지
           slidesOffsetAfter={120} // 오른쪽 버튼 영역만큼 여백
