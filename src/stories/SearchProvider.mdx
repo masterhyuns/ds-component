@@ -1,0 +1,373 @@
+import { Meta, Story, Canvas, Controls, Description } from '@storybook/blocks';
+import { SearchProvider } from '../context/SearchContext';
+import { Field } from '../components/Field';
+
+<Meta title="Headless/SearchProvider/Documentation" />
+
+# SearchProvider
+
+`SearchProvider`는 react-hook-form을 완전히 캡슐화한 헤드리스 검색 폼 관리 시스템입니다.
+사용자는 react-hook-form의 복잡한 API를 알 필요 없이, 간단한 설정과 훅을 통해 강력한 폼 관리 기능을 사용할 수 있습니다.
+
+## 핵심 특징
+
+- 🎯 **완전한 추상화**: react-hook-form의 복잡성을 숨기고 간단한 API 제공
+- 🎨 **헤드리스 구조**: UI와 로직의 완전한 분리로 자유로운 스타일링 가능
+- 🔧 **유연한 렌더링**: 메타 기반 자동 렌더링부터 완전 커스텀까지 지원
+- ⚡ **실시간 유효성 검사**: onChange 모드로 즉각적인 피드백 제공
+- 🔄 **자동 상태 관리**: 폼 상태(dirty, touched, valid 등) 자동 추적
+
+## 기본 사용법
+
+### 1. SearchProvider 설정
+
+```tsx
+import { SearchProvider } from '@/context/SearchContext';
+import { SearchConfig } from '@/types/search.types';
+
+const config: SearchConfig = {
+  id: 'my-search-form',
+  fields: [
+    {
+      id: 'keyword',
+      name: 'keyword',
+      type: 'text',
+      label: '검색어',
+      placeholder: '검색어를 입력하세요',
+      validation: {
+        required: '검색어는 필수입니다',
+        minLength: { value: 2, message: '최소 2자 이상' }
+      }
+    }
+  ],
+  onSubmit: async (data) => {
+    console.log('제출된 데이터:', data);
+  }
+};
+
+function App() {
+  return (
+    <SearchProvider config={config}>
+      {/* 폼 컴포넌트들 */}
+    </SearchProvider>
+  );
+}
+```
+
+### 2. Field 컴포넌트 사용
+
+```tsx
+import { Field } from '@/components/Field';
+import { SearchButtons } from '@/components/SearchButtons';
+
+function SearchForm() {
+  return (
+    <div>
+      {/* 메타 기반 자동 렌더링 */}
+      <Field name="keyword" />
+      
+      {/* 제출/리셋 버튼 */}
+      <SearchButtons />
+    </div>
+  );
+}
+```
+
+## SearchConfig 옵션
+
+| 속성 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| `id` | `string` | ✅ | 폼의 고유 식별자 |
+| `name` | `string` | ❌ | 폼의 이름 (선택사항) |
+| `fields` | `FieldMeta[]` | ✅ | 필드 메타 정의 배열 |
+| `onSubmit` | `(data) => void \| Promise<void>` | ❌ | 폼 제출 핸들러 |
+| `onReset` | `() => void` | ❌ | 폼 리셋 핸들러 |
+| `onChange` | `(data) => void` | ❌ | 값 변경 시 호출되는 핸들러 |
+| `autoSubmit` | `boolean` | ❌ | 자동 제출 활성화 |
+| `autoSubmitDelay` | `number` | ❌ | 자동 제출 지연 시간(ms, 기본값: 500) |
+| `defaultValues` | `FieldValues` | ❌ | 폼 기본값 |
+| `layout` | `object` | ❌ | 레이아웃 설정 |
+
+## FieldMeta 구조
+
+```tsx
+interface FieldMeta {
+  // 기본 설정
+  id: string;              // 필드 고유 ID
+  name: string;            // 필드 이름 (폼 데이터의 키)
+  type: SearchFieldType;   // 필드 타입
+  label?: string;          // 라벨 텍스트
+  placeholder?: string;    // 플레이스홀더
+  defaultValue?: any;      // 기본값
+  disabled?: boolean;      // 비활성화 여부
+  
+  // 유효성 검사
+  validation?: {
+    required?: boolean | string;
+    minLength?: number | { value: number; message: string };
+    maxLength?: number | { value: number; message: string };
+    pattern?: RegExp | { value: RegExp; message: string };
+    validate?: (value: any) => boolean | string;
+  };
+  
+  // 선택 필드용
+  options?: Option[];      // select, radio 등에서 사용
+  
+  // 조건부 렌더링
+  showWhen?: (values: FieldValues) => boolean;
+  
+  // 커스텀 속성
+  [key: string]: any;
+}
+```
+
+## 필드 타입
+
+지원되는 필드 타입들:
+
+- `text` - 텍스트 입력
+- `select` - 드롭다운 선택
+- `multiselect` - 다중 선택
+- `date` - 날짜 선택
+- `daterange` - 날짜 범위
+- `number` - 숫자 입력
+- `checkbox` - 체크박스
+- `radio` - 라디오 버튼
+- `custom` - 사용자 정의
+
+## 렌더링 방식
+
+### 1. 메타 기반 자동 렌더링
+
+```tsx
+// config에 정의된 메타 정보로 자동 렌더링
+<Field name="keyword" />
+```
+
+### 2. Render Prop 패턴
+
+```tsx
+<Field name="keyword" render={(field) => (
+  <CustomInput 
+    value={field.value}
+    onChange={field.setValue}
+    error={field.error}
+  />
+)} />
+```
+
+### 3. Children 함수 패턴
+
+```tsx
+<Field name="keyword">
+  {(field) => (
+    <input 
+      value={field.value}
+      onChange={(e) => field.setValue(e.target.value)}
+    />
+  )}
+</Field>
+```
+
+### 4. 커스텀 컴포넌트
+
+```tsx
+const MyInput: React.FC<FieldProps> = ({ value, onChange, error }) => {
+  return (
+    <div>
+      <input value={value} onChange={(e) => onChange(e.target.value)} />
+      {error && <span>{error}</span>}
+    </div>
+  );
+};
+
+<Field name="keyword" component={MyInput} />
+```
+
+## 제공되는 Hooks
+
+### useField
+
+개별 필드를 완전히 제어할 수 있는 훅입니다.
+
+```tsx
+const field = useField('keyword');
+
+// 사용 가능한 속성과 메서드
+field.value         // 현재 값
+field.setValue()    // 값 설정
+field.onChange()    // onChange 핸들러
+field.onBlur()      // onBlur 핸들러
+field.error         // 에러 메시지
+field.isDirty       // 수정 여부
+field.isTouched     // 터치 여부
+field.reset()       // 필드 리셋
+field.validate()    // 수동 유효성 검사
+```
+
+### useSearchForm
+
+전체 폼을 관리하는 훅입니다.
+
+```tsx
+const form = useSearchForm();
+
+// 사용 가능한 메서드
+await form.submit()           // 폼 제출
+form.reset()                  // 폼 리셋
+form.getValues()              // 전체 값 가져오기
+form.getValue('keyword')      // 특정 필드 값
+form.setValues({ ... })       // 여러 값 설정
+form.setValue('keyword', 'value')  // 단일 값 설정
+await form.validate()         // 전체 유효성 검사
+
+// 폼 상태
+form.isSubmitting            // 제출 중
+form.isDirty                 // 수정됨
+form.isValid                 // 유효함
+form.errors                  // 에러 목록
+```
+
+### useFieldValue
+
+특정 필드의 값만 구독하는 훅입니다.
+
+```tsx
+const keyword = useFieldValue('keyword');
+// keyword 값이 변경될 때만 리렌더링
+```
+
+### useArrayField
+
+동적 배열 필드를 관리하는 훅입니다.
+
+```tsx
+const items = useArrayField('items');
+
+items.add({ name: '', price: 0 })    // 항목 추가
+items.remove(index)                   // 항목 제거
+items.move(from, to)                  // 순서 변경
+items.insert(index, value)            // 특정 위치 삽입
+items.clear()                         // 전체 제거
+
+// 렌더링
+items.items.map((item, index) => (
+  <Field key={item.id} name={`items.${index}.name`} />
+))
+```
+
+## 고급 기능
+
+### 조건부 필드
+
+다른 필드 값에 따라 표시/숨김을 제어합니다.
+
+```tsx
+{
+  id: 'advancedOption',
+  name: 'advancedOption',
+  type: 'text',
+  showWhen: (values) => values.mode === 'advanced'
+}
+```
+
+### 자동 제출
+
+값이 변경되면 자동으로 폼을 제출합니다.
+
+```tsx
+const config: SearchConfig = {
+  autoSubmit: true,
+  autoSubmitDelay: 1000,  // 1초 후 자동 제출
+  // ...
+};
+```
+
+### 커스텀 유효성 검사
+
+```tsx
+validation: {
+  validate: (value) => {
+    if (!value.includes('@')) {
+      return '이메일 형식이 아닙니다';
+    }
+    return true;  // 유효함
+  }
+}
+```
+
+## 성능 최적화
+
+### 1. 메모이제이션
+
+SearchProvider는 내부적으로 `useMemo`와 `useCallback`을 사용하여 불필요한 리렌더링을 방지합니다.
+
+### 2. 구독 기반 업데이트
+
+`useFieldValue` 훅을 사용하면 특정 필드만 구독하여 성능을 최적화할 수 있습니다.
+
+```tsx
+// 전체 폼이 아닌 특정 필드만 구독
+const keyword = useFieldValue('keyword');
+```
+
+### 3. 지연 검증
+
+`mode: 'onChange'`로 실시간 검증을 제공하지만, 필요시 `onBlur`나 `onSubmit`으로 변경 가능합니다.
+
+## 마이그레이션 가이드
+
+### react-hook-form에서 마이그레이션
+
+```tsx
+// Before (react-hook-form)
+const { register, handleSubmit, formState: { errors } } = useForm();
+
+<input {...register('keyword', { required: true })} />
+{errors.keyword && <span>필수입니다</span>}
+
+// After (SearchProvider)
+const field = useField('keyword');
+
+<input {...field} />
+{field.error && <span>{field.error}</span>}
+```
+
+## 문제 해결
+
+### 필드가 렌더링되지 않음
+
+1. `config.fields`에 필드 메타가 정의되어 있는지 확인
+2. `Field` 컴포넌트의 `name` prop이 정확한지 확인
+3. `showWhen` 조건이 true를 반환하는지 확인
+
+### 유효성 검사가 작동하지 않음
+
+1. `validation` 규칙이 올바르게 정의되어 있는지 확인
+2. `mode: 'onChange'`가 설정되어 있는지 확인 (기본값)
+3. 커스텀 validate 함수가 boolean 또는 string을 반환하는지 확인
+
+### 값이 업데이트되지 않음
+
+1. `onChange` 핸들러가 올바르게 연결되어 있는지 확인
+2. 커스텀 컴포넌트에서 `onChange` prop을 호출하는지 확인
+3. controlled/uncontrolled 컴포넌트 충돌이 없는지 확인
+
+## 베스트 프랙티스
+
+1. **필드 ID는 유니크하게**: 각 필드의 ID는 폼 내에서 고유해야 합니다
+2. **메타 정의 재사용**: 공통 필드는 별도 상수로 정의하여 재사용
+3. **타입 안전성**: TypeScript를 사용하여 타입 안전성 확보
+4. **에러 메시지 일관성**: 에러 메시지는 사용자 친화적이고 일관되게
+5. **성능 고려**: 큰 폼의 경우 필드를 섹션으로 나누어 관리
+
+## 예제 코드
+
+전체 예제는 스토리북의 다음 스토리들을 참고하세요:
+
+- **BasicUsage**: 기본 사용법
+- **CustomLayout**: 자유로운 레이아웃
+- **CustomComponents**: 커스텀 컴포넌트
+- **ArrayFields**: 동적 배열 필드
+- **ConditionalFields**: 조건부 필드
+- **DirectHookUsage**: 훅 직접 사용
