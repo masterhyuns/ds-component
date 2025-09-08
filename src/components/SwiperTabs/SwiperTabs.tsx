@@ -11,19 +11,14 @@ import 'swiper/css/navigation';
 
 /**
  * SwiperTabs 컴포넌트
- * 스와이프 가능한 탭 네비게이션 컴포넌트
- * 활성화된 탭이 항상 보이도록 자동 스크롤 기능 포함
+ * ul/li 구조의 스와이프 가능한 탭 네비게이션
+ * 활성화된 탭이 항상 보이도록 자동 스크롤
  */
 const SwiperTabs: React.FC<SwiperTabsProps> = ({
   tabs,
   activeTabId,
   onTabChange,
   className,
-  showNavigation = true,
-  navigationIcons,
-  spaceBetween = 8,
-  slidesPerView = 'auto',
-  breakpoints,
 }) => {
   const swiperRef = useRef<SwiperType | null>(null);
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
@@ -72,7 +67,7 @@ const SwiperTabs: React.FC<SwiperTabsProps> = ({
               // 마지막 탭이 아닌 경우, 해당 탭이 오른쪽 끝에 완전히 보이도록
               const containerWidth = swiper.el.offsetWidth;
               const slideWidth = 240;
-              const spacing = spaceBetween || 8;
+              const spacing = 8; // 고정값 사용
               
               // 몇 개의 탭을 건너뛰어야 하는지 계산
               const visibleSlides = Math.floor(containerWidth / (slideWidth + spacing));
@@ -84,7 +79,7 @@ const SwiperTabs: React.FC<SwiperTabsProps> = ({
         }
       }, 100); // DOM 업데이트 대기
     }
-  }, [activeIndex, tabs.length, spaceBetween]);
+  }, [activeIndex, tabs.length]);
 
   /**
    * Swiper 초기화 시 호출되는 핸들러
@@ -165,23 +160,16 @@ const SwiperTabs: React.FC<SwiperTabsProps> = ({
       <div className={styles.swiperWrapper}>
         <Swiper
           modules={[Navigation]}
-          spaceBetween={spaceBetween}
-          slidesPerView={'auto'}
-          slidesPerGroup={1}
-          breakpoints={breakpoints}
+          spaceBetween={8} // 탭 간격 고정
+          slidesPerView={'auto'} // 자동으로 너비 계산
           onSwiper={handleSwiperInit}
-          watchOverflow={true}
-          centerInsufficientSlides={false}
-          speed={300}
-          allowTouchMove={true}
-          grabCursor={true}
-          freeMode={false}
-          cssMode={false}
-          observer={true}
-          observeParents={true}
-          observeSlideChildren={true}
-          updateOnWindowResize={true}
-          wrapperTag="ul"
+          speed={300} // 스크롤 애니메이션 속도
+          allowTouchMove={true} // 터치/마우스 드래그 허용
+          grabCursor={true} // 드래그 가능 커서 표시
+          observer={true} // DOM 변경 감지 (동적 탭 추가/삭제용)
+          observeParents={true} // 부모 요소 변경도 감지
+          slidesOffsetAfter={120} // 오른쪽 버튼 영역만큼 여백
+          wrapperTag="ul" // wrapper를 ul 태그로
           wrapperClass={styles.tabsList}
         >
           {tabs.map((tab) => (
@@ -206,55 +194,49 @@ const SwiperTabs: React.FC<SwiperTabsProps> = ({
         </Swiper>
       </div>
 
-      {/* 오른쪽 네비게이션 버튼 영역 */}
-      {showNavigation && (
-        <div className={styles.navigationArea}>
-          <button
-            className={styles.prevButton}
-            onClick={handlePrevClick}
-            disabled={isPrevDisabled}
-            aria-label="이전 탭으로 이동"
+      {/* 오른쪽 네비게이션 버튼 영역 (항상 표시) */}
+      <div className={styles.navigationArea}>
+        <button
+          className={styles.prevButton}
+          onClick={handlePrevClick}
+          disabled={isPrevDisabled}
+          aria-label="이전 탭으로 이동"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            {navigationIcons?.prev || (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            )}
-          </button>
-          <button
-            className={styles.nextButton}
-            onClick={handleNextClick}
-            disabled={isNextDisabled}
-            aria-label="다음 탭으로 이동"
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <button
+          className={styles.nextButton}
+          onClick={handleNextClick}
+          disabled={isNextDisabled}
+          aria-label="다음 탭으로 이동"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            {navigationIcons?.next || (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-      )}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 };

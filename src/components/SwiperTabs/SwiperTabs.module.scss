@@ -5,12 +5,11 @@
 }
 
 .swiperWrapper {
-  width: calc(100% - 120px); // 오른쪽 버튼 영역 제외
+  width: 100%; // 전체 너비 사용 (slidesOffsetAfter로 여백 처리)
   overflow: hidden;
   position: relative;
-  min-height: 50px; // 최소 높이 보장
+  min-height: 50px;
   
-  // 스와이프 시 커서 변경
   &:active {
     cursor: grabbing !important;
   }
