@@ -5,7 +5,7 @@
  */
 
 import { ReactNode, ComponentType } from 'react';
-import { Control, UseFormReturn, UseFormRegister, Path, PathValue } from 'react-hook-form';
+import { Control, UseFormReturn, UseFormRegister } from 'react-hook-form';
 
 // ========================================
 // 기본 타입 정의
@@ -126,19 +126,6 @@ export interface FieldMeta {
   [key: string]: any;
 }
 
-/**
- * 레거시 호환용 타입 별칭
- * SearchFieldMeta를 사용하는 기존 코드와의 호환성 유지
- * @deprecated FieldMeta를 사용하세요
- */
-export type SearchFieldMeta<TFieldValues extends FieldValues = FieldValues> = FieldMeta & {
-  /** react-hook-form Path 타입 호환 */
-  name: Path<TFieldValues>;
-  /** react-hook-form PathValue 타입 호환 */
-  defaultValue?: PathValue<TFieldValues, Path<TFieldValues>>;
-  /** 레거시 customRender 시그니처 호환 */
-  customRender?: (props: SearchFieldRenderProps<TFieldValues>) => ReactNode;
-};
 
 // ========================================
 // 통합 검색 설정
@@ -190,10 +177,7 @@ export interface SearchConfig<T = any> {
  * SearchFormConfig를 사용하는 기존 코드와의 호환성 유지
  * @deprecated SearchConfig를 사용하세요
  */
-export type SearchFormConfig<TFieldValues extends FieldValues = FieldValues> = SearchConfig<TFieldValues> & {
-  /** 레거시 필드 타입 호환 */
-  fields: SearchFieldMeta<TFieldValues>[];
-};
+export type SearchFormConfig<TFieldValues extends FieldValues = FieldValues> = SearchConfig<TFieldValues>;
 
 // ========================================
 // 통합 필드 렌더링 Props
@@ -241,7 +225,7 @@ export type FieldProps = FieldRenderProps;
  */
 export type SearchFieldRenderProps<TFieldValues extends FieldValues = FieldValues> = FieldRenderProps & {
   /** 레거시 필드 타입 호환 */
-  field: SearchFieldMeta<TFieldValues>;
+  field: FieldMeta;
   /** 레거시 폼 타입 호환 */
   form: UseFormReturn<TFieldValues>;
 };

@@ -5,7 +5,7 @@
 
 import React, { useMemo } from 'react';
 import { FieldValues } from 'react-hook-form';
-import { SearchBoxProps, SearchFieldMeta, SearchFieldRenderProps } from '../types/types';
+import { SearchBoxProps, FieldMeta, SearchFieldRenderProps } from '../types/types';
 import { useSearchBox } from '../hooks/useSearchBox';
 import { TextField } from './fields/TextField';
 import { SelectField } from './fields/SelectField';
@@ -48,14 +48,14 @@ export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
   );
 
   // 필드 렌더링
-  const renderField = (field: SearchFieldMeta<TFieldValues>) => {
+  const renderField = (field: FieldMeta) => {
     // 커스텀 렌더 함수가 있으면 사용
     if (field.customRender) {
       return field.customRender({
         field,
         form: form as any,
-        value: form.watch(field.name),
-        onChange: (value) => form.setValue(field.name, value),
+        value: form.watch(field.name as any),
+        onChange: (value) => form.setValue(field.name as any, value),
         error: errors[field.name]?.message as string,
       });
     }
@@ -75,8 +75,8 @@ export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
         key={field.id}
         field={field as any}
         form={form as any}
-        value={form.watch(field.name)}
-        onChange={(value) => form.setValue(field.name, value)}
+        value={form.watch(field.name as any)}
+        onChange={(value) => form.setValue(field.name as any, value)}
         error={errors[field.name]?.message as string}
       />
     );
