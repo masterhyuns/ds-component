@@ -10,7 +10,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useCallback, useEffect } from 'react';
-import { useForm, FieldValues as RHFFieldValues, UseFormReturn, Unsubscribe } from 'react-hook-form';
+import { useForm, FieldValues as RHFFieldValues, UseFormReturn } from 'react-hook-form';
 import {
   SearchContextValue,
   SearchProviderProps,
@@ -169,7 +169,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     }
     
     // watch()는 구독을 반환하며, 값이 변경될 때마다 콜백 실행
-    const subscription: Unsubscribe = watch((data) => {
+    const subscription = watch((data) => {
       config.onChange!(data as FieldValues);
     });
     

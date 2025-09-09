@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { SearchProvider } from '../context/SearchContext';
 import { Field } from '../components/Field';
 import { SearchButtons } from '../components/SearchButtons';
-import { useSearchForm, useFieldValue, useField } from '../hooks';
+import { useSearchForm, useFieldValue } from '../hooks';
 import { SearchConfig, FieldProps } from '../types/search.types';
 
 const meta: Meta = {
@@ -201,15 +201,7 @@ export const MultiStepForm = () => {
 
     const handleNext = async () => {
       // 현재 단계의 필드만 검증
-      let fieldsToValidate: string[] = [];
-      
-      if (currentStep === 1) {
-        fieldsToValidate = ['name', 'email'];
-      } else if (currentStep === 2) {
-        fieldsToValidate = ['company', 'position'];
-      }
-      
-      // 실제로는 부분 검증 로직 구현 필요
+      // TODO: 부분 검증 로직 구현 필요
       setCurrentStep(currentStep + 1);
     };
 
@@ -458,7 +450,7 @@ export const RealTimeValidation = () => {
         validation: {
           required: '비밀번호 확인은 필수입니다',
           validate: (value, values) => {
-            if (value !== values.password) {
+            if (value !== values?.password) {
               return '비밀번호가 일치하지 않습니다';
             }
             return true;

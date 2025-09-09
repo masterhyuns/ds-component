@@ -15,8 +15,8 @@ import styles from './SearchBox.module.scss';
  * 필드 타입에 따른 기본 컴포넌트 매핑
  */
 const defaultFieldComponents: Record<string, React.ComponentType<SearchFieldRenderProps>> = {
-  text: TextField,
-  select: SelectField,
+  text: TextField as any,  // 타입 호환성 문제 임시 해결
+  select: SelectField as any,  // 타입 호환성 문제 임시 해결
   // 추가 필드 타입은 여기에 매핑
 };
 
