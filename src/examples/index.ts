@@ -6,3 +6,4 @@ export { BasicSearchExample } from './BasicSearchExample';
 export { CustomLayoutExample } from './CustomLayoutExample';
 export { ConditionalFieldsExample } from './ConditionalFieldsExample';
 export { ArrayFieldsExample } from './ArrayFieldsExample';
+export { DateSearchExample } from './DateSearchExample';

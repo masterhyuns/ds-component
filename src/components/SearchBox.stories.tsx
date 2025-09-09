@@ -308,3 +308,68 @@ export const WithValidation: Story = {
     },
   },
 };
+
+/**
+ * 날짜 검색 예제
+ */
+export const DateSearch: Story = {
+  args: {
+    config: {
+      id: 'date-search',
+      name: '날짜 검색',
+      layout: {
+        columns: 2,
+        gap: '1rem',
+      },
+      fields: [
+        {
+          id: 'createdDate',
+          name: 'createdDate',
+          type: 'date',
+          label: '생성일',
+          placeholder: '생성일을 선택하세요',
+        },
+        {
+          id: 'projectPeriod',
+          name: 'projectPeriod',
+          type: 'daterange',
+          label: '프로젝트 기간',
+          placeholder: '시작일 ~ 종료일',
+          defaultValue: {
+            start: '2024-01-01',
+            end: '2024-12-31'
+          }
+        },
+        {
+          id: 'status',
+          name: 'status',
+          type: 'select',
+          label: '상태',
+          options: [
+            { label: '전체', value: 'all' },
+            { label: '진행중', value: 'active' },
+            { label: '완료', value: 'completed' },
+            { label: '대기중', value: 'pending' },
+          ],
+          defaultValue: 'all'
+        },
+        {
+          id: 'includeArchived',
+          name: 'includeArchived',
+          type: 'checkbox',
+          label: '보관된 항목 포함',
+          defaultValue: false
+        }
+      ],
+      onSubmit: (data: any) => {
+        console.log('날짜 검색 조건:', data);
+        alert('검색 조건:\n' + JSON.stringify(data, null, 2));
+      },
+      onReset: () => {
+        console.log('검색 조건 초기화');
+      },
+      submitText: '검색',
+      resetText: '초기화',
+    },
+  },
+};
