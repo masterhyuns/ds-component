@@ -53,7 +53,7 @@ export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
     if (field.customRender) {
       return field.customRender({
         field,
-        form,
+        form: form as any,
         value: form.watch(field.name),
         onChange: (value) => form.setValue(field.name, value),
         error: errors[field.name]?.message as string,

@@ -50,5 +50,4 @@ export type {
   SearchFormConfig,
   SearchBoxProps,
   SearchResult,
-  SearchContext,
 } from './types/types';
