@@ -9,6 +9,8 @@ import { SearchBoxProps, FieldMeta, FieldRenderProps } from '../types/types';
 import { useSearchBox } from '../hooks/useSearchBox';
 import { TextField } from './fields/TextField';
 import { SelectField } from './fields/SelectField';
+import { DateField } from './fields/DateField';
+import { DateRangeField } from './fields/DateRangeField';
 import styles from './SearchBox.module.scss';
 
 /**
@@ -17,6 +19,8 @@ import styles from './SearchBox.module.scss';
 const defaultFieldComponents: Record<string, React.ComponentType<FieldRenderProps>> = {
   text: TextField as any,  // 타입 호환성 문제 임시 해결
   select: SelectField as any,  // 타입 호환성 문제 임시 해결
+  date: DateField as any,  // 날짜 선택 필드
+  daterange: DateRangeField as any,  // 날짜 범위 선택 필드
   // 추가 필드 타입은 여기에 매핑
 };
 
