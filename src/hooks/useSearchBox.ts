@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useCallback } from 'react';
 import { useForm, FieldValues, UseFormReturn, Path } from 'react-hook-form';
-import { SearchFormConfig, FieldMeta } from '../types/types';
+import { SearchConfig, FieldMeta } from '../types/types';
 
 /**
  * 검색 박스 훅의 반환 타입
@@ -33,7 +33,7 @@ export interface UseSearchBoxReturn<TFieldValues extends FieldValues = FieldValu
  * @returns 검색 박스 제어 객체
  */
 export const useSearchBox = <TFieldValues extends FieldValues = FieldValues>(
-  config: SearchFormConfig<TFieldValues>
+  config: SearchConfig<TFieldValues>
 ): UseSearchBoxReturn<TFieldValues> => {
   // 기본값 설정
   const defaultValues = useMemo(() => {

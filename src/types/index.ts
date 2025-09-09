@@ -172,12 +172,6 @@ export interface SearchConfig<T = any> {
   showButtons?: boolean;
 }
 
-/**
- * 레거시 호환용 타입 별칭
- * SearchFormConfig를 사용하는 기존 코드와의 호환성 유지
- * @deprecated SearchConfig를 사용하세요
- */
-export type SearchFormConfig<TFieldValues extends FieldValues = FieldValues> = SearchConfig<TFieldValues>;
 
 // ========================================
 // 통합 필드 렌더링 Props
@@ -270,7 +264,7 @@ export interface FieldComponentProps {
  */
 export interface SearchBoxProps<TFieldValues extends FieldValues = FieldValues> {
   /** 검색 폼 설정 */
-  config: SearchFormConfig<TFieldValues>;
+  config: SearchConfig<TFieldValues>;
   /** 커스텀 필드 컴포넌트 매핑 */
   customComponents?: Record<string, ComponentType<SearchFieldRenderProps<TFieldValues>>>;
   /** 스타일 클래스명 */

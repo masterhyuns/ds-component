@@ -46,7 +46,6 @@ export type { UseSearchBoxReturn } from './hooks/useSearchBox';
 // 레거시 타입 (deprecated)
 export type {
   SearchFieldRenderProps,
-  SearchFormConfig,
   SearchBoxProps,
   SearchResult,
 } from './types/types';
