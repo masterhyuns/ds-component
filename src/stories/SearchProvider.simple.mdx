@@ -1,0 +1,288 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Headless/SearchProvider/Quick Start" />
+
+# SearchProvider 빠른 시작
+
+## 설치 및 설정
+
+### 1단계: SearchProvider로 감싸기
+
+```tsx
+import { SearchProvider } from '@/context/SearchContext';
+
+const config = {
+  id: 'my-form',
+  fields: [
+    {
+      id: 'search',
+      name: 'search',
+      type: 'text',
+      label: '검색',
+      placeholder: '검색어 입력'
+    }
+  ],
+  onSubmit: (data) => {
+    console.log(data);
+  }
+};
+
+function App() {
+  return (
+    <SearchProvider config={config}>
+      {/* 자식 컴포넌트 */}
+    </SearchProvider>
+  );
+}
+```
+
+### 2단계: Field 컴포넌트 사용
+
+```tsx
+import { Field } from '@/components/Field';
+import { SearchButtons } from '@/components/SearchButtons';
+
+function SearchForm() {
+  return (
+    <div>
+      <Field name="search" />
+      <SearchButtons />
+    </div>
+  );
+}
+```
+
+## 주요 기능
+
+### 유효성 검사
+
+```tsx
+{
+  id: 'email',
+  name: 'email',
+  type: 'text',
+  validation: {
+    required: '이메일은 필수입니다',
+    pattern: {
+      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      message: '올바른 이메일 형식이 아닙니다'
+    }
+  }
+}
+```
+
+### 조건부 필드
+
+```tsx
+{
+  id: 'details',
+  name: 'details',
+  type: 'text',
+  showWhen: (values) => values.hasDetails === true
+}
+```
+
+### 커스텀 컴포넌트
+
+```tsx
+const MyInput = ({ value, onChange, error }) => (
+  <div>
+    <input value={value} onChange={e => onChange(e.target.value)} />
+    {error && <span>{error}</span>}
+  </div>
+);
+
+<Field name="custom" component={MyInput} />
+```
+
+### Hooks 사용
+
+```tsx
+// 개별 필드 제어
+const field = useField('search');
+console.log(field.value);
+
+// 전체 폼 제어
+const form = useSearchForm();
+await form.submit();
+
+// 필드 값만 구독
+const searchValue = useFieldValue('search');
+
+// 배열 필드 관리
+const items = useArrayField('items');
+items.add({ name: '', price: 0 });
+```
+
+## 필드 타입
+
+지원되는 필드 타입:
+
+- **text**: 텍스트 입력
+- **select**: 드롭다운
+- **multiselect**: 다중 선택
+- **date**: 날짜 선택
+- **number**: 숫자 입력
+- **checkbox**: 체크박스
+- **radio**: 라디오 버튼
+- **custom**: 사용자 정의
+
+## 예제 모음
+
+### 기본 검색 폼
+
+```tsx
+const config = {
+  id: 'search',
+  fields: [
+    {
+      id: 'query',
+      name: 'query',
+      type: 'text',
+      label: '검색어',
+      placeholder: '검색어를 입력하세요'
+    },
+    {
+      id: 'category',
+      name: 'category',
+      type: 'select',
+      label: '카테고리',
+      options: [
+        { label: '전체', value: '' },
+        { label: '제품', value: 'product' },
+        { label: '서비스', value: 'service' }
+      ]
+    }
+  ],
+  onSubmit: async (data) => {
+    const results = await search(data);
+    console.log(results);
+  }
+};
+```
+
+### 회원가입 폼
+
+```tsx
+const config = {
+  id: 'signup',
+  fields: [
+    {
+      id: 'username',
+      name: 'username',
+      type: 'text',
+      label: '사용자명',
+      validation: {
+        required: '사용자명은 필수입니다',
+        minLength: { value: 3, message: '최소 3자 이상' }
+      }
+    },
+    {
+      id: 'email',
+      name: 'email',
+      type: 'text',
+      label: '이메일',
+      validation: {
+        required: '이메일은 필수입니다',
+        pattern: {
+          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+          message: '올바른 이메일 형식이 아닙니다'
+        }
+      }
+    },
+    {
+      id: 'password',
+      name: 'password',
+      type: 'text',
+      label: '비밀번호',
+      validation: {
+        required: '비밀번호는 필수입니다',
+        minLength: { value: 8, message: '최소 8자 이상' }
+      }
+    }
+  ],
+  onSubmit: async (data) => {
+    await signup(data);
+  }
+};
+```
+
+### 동적 배열 필드
+
+```tsx
+function ProductList() {
+  const products = useArrayField('products');
+  
+  return (
+    <div>
+      {products.items.map((item, index) => (
+        <div key={item.id}>
+          <Field name={`products.${index}.name`} />
+          <Field name={`products.${index}.price`} />
+          <button onClick={() => products.remove(index)}>
+            삭제
+          </button>
+        </div>
+      ))}
+      <button onClick={() => products.add()}>
+        추가
+      </button>
+    </div>
+  );
+}
+```
+
+## 팁과 트릭
+
+### 성능 최적화
+
+1. **특정 필드만 구독하기**
+   ```tsx
+   const value = useFieldValue('specificField');
+   ```
+
+2. **메모이제이션 활용**
+   ```tsx
+   const memoizedConfig = useMemo(() => config, []);
+   ```
+
+3. **지연 검증**
+   ```tsx
+   mode: 'onBlur' // onChange 대신 onBlur 사용
+   ```
+
+### 디버깅
+
+1. **폼 상태 확인**
+   ```tsx
+   const form = useSearchForm();
+   console.log({
+     isValid: form.isValid,
+     isDirty: form.isDirty,
+     errors: form.errors
+   });
+   ```
+
+2. **필드 상태 확인**
+   ```tsx
+   const field = useField('myField');
+   console.log({
+     value: field.value,
+     error: field.error,
+     isDirty: field.isDirty
+   });
+   ```
+
+## 자주 묻는 질문
+
+**Q: react-hook-form을 직접 사용할 수 있나요?**
+A: 가능하지만 권장하지 않습니다. SearchProvider의 추상화된 API를 사용하세요.
+
+**Q: 커스텀 필드 타입을 추가할 수 있나요?**
+A: 네, type을 'custom'으로 설정하고 커스텀 컴포넌트를 제공하세요.
+
+**Q: 서버 사이드 검증은 어떻게 하나요?**
+A: onSubmit 핸들러에서 서버 응답을 처리하고 setError를 사용하세요.
+
+**Q: 큰 폼의 성능을 개선하려면?**
+A: useFieldValue로 특정 필드만 구독하고, 섹션을 나누어 관리하세요.

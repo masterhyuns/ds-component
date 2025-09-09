@@ -32,9 +32,9 @@ export interface UseSearchBoxReturn<TFieldValues extends FieldValues = FieldValu
  * @param config - 검색 폼 설정
  * @returns 검색 박스 제어 객체
  */
-export function useSearchBox<TFieldValues extends FieldValues = FieldValues>(
+export const useSearchBox = <TFieldValues extends FieldValues = FieldValues>(
   config: SearchFormConfig<TFieldValues>
-): UseSearchBoxReturn<TFieldValues> {
+): UseSearchBoxReturn<TFieldValues> => {
   // 기본값 설정
   const defaultValues = useMemo(() => {
     const values: Partial<TFieldValues> = {};
@@ -137,4 +137,4 @@ export function useSearchBox<TFieldValues extends FieldValues = FieldValues>(
     handleFieldChange,
     isSubmitting: formState.isSubmitting,
   };
-}
+};

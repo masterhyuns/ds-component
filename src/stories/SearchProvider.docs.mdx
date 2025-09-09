@@ -1,0 +1,288 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Headless/SearchProvider/Docs" />
+
+# SearchProvider 문서
+
+## 개요
+
+SearchProvider는 react-hook-form을 완전히 캡슐화한 헤드리스 검색 폼 관리 시스템입니다.
+
+## 핵심 특징
+
+- **완전한 추상화**: react-hook-form의 복잡성을 숨기고 간단한 API 제공
+- **헤드리스 구조**: UI와 로직의 완전한 분리로 자유로운 스타일링 가능
+- **유연한 렌더링**: 메타 기반 자동 렌더링부터 완전 커스텀까지 지원
+- **실시간 유효성 검사**: onChange 모드로 즉각적인 피드백 제공
+- **자동 상태 관리**: 폼 상태(dirty, touched, valid 등) 자동 추적
+
+## SearchConfig 옵션
+
+### 필수 속성
+
+**id** (string)
+- 폼의 고유 식별자
+
+**fields** (FieldMeta[])
+- 필드 메타 정의 배열
+
+### 선택 속성
+
+**name** (string)
+- 폼의 이름
+
+**onSubmit** (Function)
+- 폼 제출 핸들러
+
+**onReset** (Function)
+- 폼 리셋 핸들러
+
+**onChange** (Function)
+- 값 변경 시 호출되는 핸들러
+
+**autoSubmit** (boolean)
+- 자동 제출 활성화 (기본값: false)
+
+**autoSubmitDelay** (number)
+- 자동 제출 지연 시간 (기본값: 500ms)
+
+**defaultValues** (FieldValues)
+- 폼 기본값 (기본값: {})
+
+**layout** (object)
+- 레이아웃 설정
+
+## FieldMeta 구조
+
+### 기본 속성
+
+**id** (string) - 필수
+- 필드 고유 ID
+
+**name** (string) - 필수
+- 필드 이름 (폼 데이터의 키)
+
+**type** (SearchFieldType) - 필수
+- 필드 타입 (text, select, number, date 등)
+
+**label** (string)
+- 라벨 텍스트
+
+**placeholder** (string)
+- 플레이스홀더
+
+**defaultValue** (any)
+- 기본값
+
+**disabled** (boolean)
+- 비활성화 여부
+
+### 유효성 검사
+
+**validation** (object)
+- required: boolean 또는 string
+- minLength: number 또는 object
+- maxLength: number 또는 object
+- pattern: RegExp 또는 object
+- validate: Function
+
+### 조건부 렌더링
+
+**showWhen** (Function)
+- 다른 필드 값에 따라 표시/숨김 제어
+
+### 선택 필드용
+
+**options** (Option[])
+- select, radio 등에서 사용하는 옵션 목록
+
+## 제공되는 Hooks
+
+### useField(name)
+
+개별 필드를 제어하는 훅
+
+반환값:
+- value: 현재 값
+- setValue: 값 설정 함수
+- onChange: onChange 핸들러
+- onBlur: onBlur 핸들러
+- error: 에러 메시지
+- isDirty: 수정 여부
+- isTouched: 터치 여부
+- reset: 필드 리셋
+- validate: 수동 유효성 검사
+
+### useSearchForm()
+
+전체 폼을 관리하는 훅
+
+반환값:
+- submit: 폼 제출
+- reset: 폼 리셋
+- getValues: 전체 값 가져오기
+- getValue: 특정 필드 값
+- setValues: 여러 값 설정
+- setValue: 단일 값 설정
+- validate: 전체 유효성 검사
+- isSubmitting: 제출 중
+- isDirty: 수정됨
+- isValid: 유효함
+- errors: 에러 목록
+
+### useFieldValue(name)
+
+특정 필드 값만 구독
+
+### useArrayField(name)
+
+동적 배열 필드 관리
+
+반환값:
+- items: 배열 아이템들
+- add: 항목 추가
+- remove: 항목 제거
+- move: 순서 변경
+- insert: 특정 위치 삽입
+- clear: 전체 제거
+
+## 렌더링 방식
+
+### 1. 메타 기반 자동 렌더링
+
+```jsx
+<Field name="keyword" />
+```
+
+### 2. Render Prop 패턴
+
+```jsx
+<Field name="keyword" render={(field) => (
+  <CustomInput {...field} />
+)} />
+```
+
+### 3. Children 함수 패턴
+
+```jsx
+<Field name="keyword">
+  {(field) => <CustomInput {...field} />}
+</Field>
+```
+
+### 4. 커스텀 컴포넌트
+
+```jsx
+<Field name="keyword" component={MyInput} />
+```
+
+## 사용 예제
+
+### 기본 사용법
+
+```jsx
+const config = {
+  id: 'search-form',
+  fields: [
+    {
+      id: 'keyword',
+      name: 'keyword',
+      type: 'text',
+      label: '검색어',
+      validation: {
+        required: '검색어는 필수입니다'
+      }
+    }
+  ],
+  onSubmit: async (data) => {
+    console.log(data);
+  }
+};
+
+function App() {
+  return (
+    <SearchProvider config={config}>
+      <Field name="keyword" />
+      <SearchButtons />
+    </SearchProvider>
+  );
+}
+```
+
+### 조건부 필드
+
+```jsx
+{
+  id: 'advanced',
+  name: 'advanced',
+  type: 'text',
+  showWhen: (values) => values.mode === 'advanced'
+}
+```
+
+### 커스텀 유효성 검사
+
+```jsx
+validation: {
+  validate: (value) => {
+    if (!value.includes('@')) {
+      return '이메일 형식이 아닙니다';
+    }
+    return true;
+  }
+}
+```
+
+### 자동 제출
+
+```jsx
+const config = {
+  autoSubmit: true,
+  autoSubmitDelay: 1000,
+  // ...
+};
+```
+
+## 성능 최적화
+
+### 메모이제이션
+- SearchProvider는 내부적으로 useMemo와 useCallback을 사용하여 불필요한 리렌더링 방지
+
+### 구독 기반 업데이트
+- useFieldValue 훅으로 특정 필드만 구독하여 성능 최적화
+
+### 지연 검증
+- mode: 'onChange'로 실시간 검증 제공 (필요시 onBlur나 onSubmit으로 변경 가능)
+
+## 마이그레이션 가이드
+
+### react-hook-form에서 마이그레이션
+
+Before:
+```jsx
+const { register, handleSubmit, formState: { errors } } = useForm();
+<input {...register('keyword', { required: true })} />
+```
+
+After:
+```jsx
+const field = useField('keyword');
+<input {...field} />
+```
+
+## 문제 해결
+
+### 필드가 렌더링되지 않음
+1. config.fields에 필드 메타가 정의되어 있는지 확인
+2. Field 컴포넌트의 name prop이 정확한지 확인
+3. showWhen 조건이 true를 반환하는지 확인
+
+### 유효성 검사가 작동하지 않음
+1. validation 규칙이 올바르게 정의되어 있는지 확인
+2. mode: 'onChange'가 설정되어 있는지 확인
+3. 커스텀 validate 함수가 boolean 또는 string을 반환하는지 확인
+
+### 값이 업데이트되지 않음
+1. onChange 핸들러가 올바르게 연결되어 있는지 확인
+2. 커스텀 컴포넌트에서 onChange prop을 호출하는지 확인
+3. controlled/uncontrolled 컴포넌트 충돌이 없는지 확인

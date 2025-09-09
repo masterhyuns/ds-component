@@ -75,18 +75,25 @@ function SearchForm() {
 
 ## SearchConfig 옵션
 
-| 속성 | 타입 | 필수 | 설명 |
-|------|------|------|------|
-| `id` | `string` | ✅ | 폼의 고유 식별자 |
-| `name` | `string` | ❌ | 폼의 이름 (선택사항) |
-| `fields` | `FieldMeta[]` | ✅ | 필드 메타 정의 배열 |
-| `onSubmit` | `(data) => void \| Promise<void>` | ❌ | 폼 제출 핸들러 |
-| `onReset` | `() => void` | ❌ | 폼 리셋 핸들러 |
-| `onChange` | `(data) => void` | ❌ | 값 변경 시 호출되는 핸들러 |
-| `autoSubmit` | `boolean` | ❌ | 자동 제출 활성화 |
-| `autoSubmitDelay` | `number` | ❌ | 자동 제출 지연 시간(ms, 기본값: 500) |
-| `defaultValues` | `FieldValues` | ❌ | 폼 기본값 |
-| `layout` | `object` | ❌ | 레이아웃 설정 |
+### 필수 속성
+
+| 속성 | 타입 | 설명 |
+| --- | --- | --- |
+| id | string | 폼의 고유 식별자 |
+| fields | FieldMeta[] | 필드 메타 정의 배열 |
+
+### 선택 속성
+
+| 속성 | 타입 | 기본값 | 설명 |
+| --- | --- | --- | --- |
+| name | string | - | 폼의 이름 |
+| onSubmit | Function | - | 폼 제출 핸들러 |
+| onReset | Function | - | 폼 리셋 핸들러 |
+| onChange | Function | - | 값 변경 시 호출되는 핸들러 |
+| autoSubmit | boolean | false | 자동 제출 활성화 |
+| autoSubmitDelay | number | 500 | 자동 제출 지연 시간(ms) |
+| defaultValues | object | {} | 폼 기본값 |
+| layout | object | - | 레이아웃 설정 |
 
 ## FieldMeta 구조
 
