@@ -36,15 +36,17 @@ export const useSearchBox = <TFieldValues extends FieldValues = FieldValues>(
   config: SearchConfig<TFieldValues>
 ): UseSearchBoxReturn<TFieldValues> => {
   // 기본값 설정
+  // config.defaultValues와 field.defaultValue를 병합
   const defaultValues = useMemo(() => {
-    const values: Partial<TFieldValues> = {};
+    const values: Partial<TFieldValues> = { ...(config.defaultValues || {}) } as any;
     config.fields.forEach((field) => {
-      if (field.defaultValue !== undefined) {
+      // field.defaultValue가 있고 config.defaultValues에 없으면 추가
+      if (field.defaultValue !== undefined && values[field.name as keyof TFieldValues] === undefined) {
         (values as any)[field.name] = field.defaultValue;
       }
     });
     return values;
-  }, [config.fields]);
+  }, [config.fields, config.defaultValues]);
 
   // react-hook-form 초기화
   const form = useForm<TFieldValues>({

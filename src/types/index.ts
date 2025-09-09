@@ -35,6 +35,7 @@ export type SearchFieldType =
   | 'file'           // 파일 업로드
   | 'tags'           // 태그 입력
   | 'textarea'       // 텍스트 영역
+  | 'hidden'         // 숨김 필드 (폼 데이터에는 포함되지만 UI에 표시되지 않음)
   | 'custom';        // 사용자 정의
 
 /**

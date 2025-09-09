@@ -49,6 +49,18 @@ export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
 
   // 필드 렌더링
   const renderField = (field: FieldMeta) => {
+    // hidden 필드 처리 (최우선)
+    if (field.type === 'hidden') {
+      return (
+        <input
+          key={field.id}
+          type="hidden"
+          {...form.register(field.name as any)}
+          defaultValue={field.defaultValue || ''}
+        />
+      );
+    }
+
     // 커스텀 렌더 함수가 있으면 사용
     if (field.customRender) {
       return field.customRender({
