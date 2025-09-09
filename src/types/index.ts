@@ -212,17 +212,6 @@ export interface FieldRenderProps {
  */
 export type FieldProps = FieldRenderProps;
 
-/**
- * 레거시 호환용 타입 별칭
- * SearchFieldRenderProps를 사용하는 기존 코드와의 호환성 유지
- * @deprecated FieldRenderProps를 사용하세요
- */
-export type SearchFieldRenderProps<TFieldValues extends FieldValues = FieldValues> = FieldRenderProps & {
-  /** 레거시 필드 타입 호환 */
-  field: FieldMeta;
-  /** 레거시 폼 타입 호환 */
-  form: UseFormReturn<TFieldValues>;
-};
 
 // ========================================
 // 컴포넌트 Props
@@ -266,7 +255,7 @@ export interface SearchBoxProps<TFieldValues extends FieldValues = FieldValues> 
   /** 검색 폼 설정 */
   config: SearchConfig<TFieldValues>;
   /** 커스텀 필드 컴포넌트 매핑 */
-  customComponents?: Record<string, ComponentType<SearchFieldRenderProps<TFieldValues>>>;
+  customComponents?: Record<string, ComponentType<FieldRenderProps>>;
   /** 스타일 클래스명 */
   className?: string;
   /** 인라인 스타일 */

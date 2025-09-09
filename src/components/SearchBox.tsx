@@ -5,7 +5,7 @@
 
 import React, { useMemo } from 'react';
 import { FieldValues } from 'react-hook-form';
-import { SearchBoxProps, FieldMeta, SearchFieldRenderProps } from '../types/types';
+import { SearchBoxProps, FieldMeta, FieldRenderProps } from '../types/types';
 import { useSearchBox } from '../hooks/useSearchBox';
 import { TextField } from './fields/TextField';
 import { SelectField } from './fields/SelectField';
@@ -14,7 +14,7 @@ import styles from './SearchBox.module.scss';
 /**
  * 필드 타입에 따른 기본 컴포넌트 매핑
  */
-const defaultFieldComponents: Record<string, React.ComponentType<SearchFieldRenderProps>> = {
+const defaultFieldComponents: Record<string, React.ComponentType<FieldRenderProps>> = {
   text: TextField as any,  // 타입 호환성 문제 임시 해결
   select: SelectField as any,  // 타입 호환성 문제 임시 해결
   // 추가 필드 타입은 여기에 매핑
