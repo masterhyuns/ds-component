@@ -42,31 +42,33 @@ export const AutocompleteSearch = () => {
         }
       }
     ],
-    onChange: async (data) => {
-      if (data.query && data.query.length >= 2) {
-        setLoading(true);
-        // 실제로는 API 호출
-        setTimeout(() => {
-          setSuggestions([
-            `${data.query} 제품`,
-            `${data.query} 서비스`,
-            `${data.query} 문서`,
-            `${data.query} 사용자`,
-          ]);
-          setLoading(false);
-        }, 300);
-      } else {
-        setSuggestions([]);
-      }
-    },
-    onSubmit: async (data) => {
-      console.log('검색 실행:', data.query);
-      // 실제 검색 실행
-    }
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onChange={async (name: string, value: any, _values: any) => {
+        if (name === 'query' && value && value.length >= 2) {
+          setLoading(true);
+          // 실제로는 API 호출
+          setTimeout(() => {
+            setSuggestions([
+              `${value} 제품`,
+              `${value} 서비스`,
+              `${value} 문서`,
+              `${value} 사용자`,
+            ]);
+            setLoading(false);
+          }, 300);
+        } else if (name === 'query') {
+          setSuggestions([]);
+        }
+      }}
+      onSubmit={async (data: any) => {
+        console.log('검색 실행:', data.query);
+        // 실제 검색 실행
+      }}
+    >
       <div style={{ maxWidth: 500, position: 'relative' }}>
         <h2>실시간 자동완성 검색</h2>
         
@@ -190,10 +192,6 @@ export const MultiStepForm = () => {
         }
       }
     ],
-    onSubmit: async (data) => {
-      console.log('제출 완료:', data);
-      alert('가입이 완료되었습니다!');
-    }
   };
 
   const StepForm = () => {
@@ -311,7 +309,13 @@ export const MultiStepForm = () => {
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('제출 완료:', data);
+        alert('가입이 완료되었습니다!');
+      }}
+    >
       <div>
         <h2>다단계 폼</h2>
         <StepForm />
@@ -458,9 +462,6 @@ export const RealTimeValidation = () => {
         }
       }
     ],
-    onSubmit: async (data) => {
-      console.log('가입 완료:', data);
-    }
   };
 
   // 실시간 상태 표시 컴포넌트
@@ -488,7 +489,12 @@ export const RealTimeValidation = () => {
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('가입 완료:', data);
+      }}
+    >
       <div style={{ maxWidth: 500 }}>
         <h2>실시간 유효성 검사</h2>
         
@@ -568,14 +574,6 @@ export const DynamicFilterSearch = () => {
         ],
       },
     ],
-    onSubmit: async (data) => {
-      // 활성화된 필터만 포함
-      const filteredData = Object.entries(data)
-        .filter(([key]) => activeFilters.includes(key))
-        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
-      
-      console.log('검색 필터:', filteredData);
-    },
   };
 
   const toggleFilter = (filterId: string) => {
@@ -587,7 +585,17 @@ export const DynamicFilterSearch = () => {
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        // 활성화된 필터만 포함
+        const filteredData = Object.entries(data)
+          .filter(([key]) => activeFilters.includes(key))
+          .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+        
+        console.log('검색 필터:', filteredData);
+      }}
+    >
       <div style={{ maxWidth: 600 }}>
         <h2>동적 필터 검색</h2>
         
@@ -699,24 +707,27 @@ export const PersistentForm = () => {
         ]
       }
     ],
-    onChange: (data) => {
-      // 값이 변경될 때마다 localStorage에 저장
-      localStorage.setItem('persistent-form', JSON.stringify(data));
-    },
-    onSubmit: async (data) => {
-      console.log('제출:', data);
-      // 제출 후 localStorage 클리어
-      localStorage.removeItem('persistent-form');
-      alert('제출되었습니다!');
-    },
-    onReset: () => {
-      // 리셋 시 localStorage도 클리어
-      localStorage.removeItem('persistent-form');
-    }
   };
 
   return (
-    <SearchProvider config={config} initialValues={savedValues}>
+    <SearchProvider 
+      config={config} 
+      initialValues={savedValues}
+      onChange={(_name: string, _value: any, values: any) => {
+        // 값이 변경될 때마다 localStorage에 저장
+        localStorage.setItem('persistent-form', JSON.stringify(values));
+      }}
+      onSubmit={async (data: any) => {
+        console.log('제출:', data);
+        // 제출 후 localStorage 클리어
+        localStorage.removeItem('persistent-form');
+        alert('제출되었습니다!');
+      }}
+      onReset={() => {
+        // 리셋 시 localStorage도 클리어
+        localStorage.removeItem('persistent-form');
+      }}
+    >
       <div style={{ maxWidth: 500 }}>
         <h2>자동 저장 폼</h2>
         <div style={{

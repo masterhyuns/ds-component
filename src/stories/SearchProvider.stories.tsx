@@ -53,14 +53,16 @@ export const BasicUsage = () => {
         ],
       },
     ],
-    onSubmit: async (data) => {
-      console.log('제출된 데이터:', data);
-      alert(JSON.stringify(data, null, 2));
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('제출된 데이터:', data);
+        alert(JSON.stringify(data, null, 2));
+      }}
+    >
       <div style={{ maxWidth: 600 }}>
         <h2>기본 사용법</h2>
         <Field name="keyword" />
@@ -110,13 +112,15 @@ export const CustomLayout = () => {
         ],
       },
     ],
-    onSubmit: async (data) => {
-      console.log('제출:', data);
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('제출:', data);
+      }}
+    >
       <div style={{ padding: '2rem', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
         <h2 style={{ marginBottom: '1.5rem' }}>직원 검색</h2>
         
@@ -224,13 +228,15 @@ export const CustomComponents = () => {
         },
       },
     ],
-    onSubmit: async (data) => {
-      console.log('로그인:', data);
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('로그인:', data);
+      }}
+    >
       <div style={{ maxWidth: 400 }}>
         <h2>커스텀 컴포넌트 예제</h2>
         
@@ -327,13 +333,15 @@ export const DirectHookUsage = () => {
         placeholder: '필드 2',
       },
     ],
-    onSubmit: async (data) => {
-      console.log('제출:', data);
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('제출:', data);
+      }}
+    >
       <div>
         <h2>useField 훅 직접 사용</h2>
         <CustomFieldWithHook fieldName="field1" />
@@ -408,13 +416,15 @@ export const ArrayFields = () => {
     defaultValues: {
       products: [{ name: '제품 1', price: 10000 }],
     },
-    onSubmit: async (data) => {
-      console.log('제품 목록:', data);
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('제품 목록:', data);
+      }}
+    >
       <div style={{ maxWidth: 600 }}>
         <h2>배열 필드 예제</h2>
         <ProductList />
@@ -470,9 +480,6 @@ export const ConditionalFields = () => {
         showWhen: (values) => values.type === 'advanced',
       },
     ],
-    onSubmit: async (data) => {
-      console.log('검색:', data);
-    },
   };
 
   // 타입 값 감시 컴포넌트
@@ -491,7 +498,12 @@ export const ConditionalFields = () => {
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data: any) => {
+        console.log('검색:', data);
+      }}
+    >
       <div style={{ maxWidth: 500 }}>
         <h2>조건부 필드</h2>
         <Field name="type" />
