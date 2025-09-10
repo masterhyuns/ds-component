@@ -28,12 +28,26 @@ export interface UseSearchBoxReturn<TFieldValues extends FieldValues = FieldValu
 }
 
 /**
+ * 검색 박스 훅 옵션 타입
+ */
+export interface UseSearchBoxOptions<TFieldValues extends FieldValues = FieldValues> {
+  /** 제출 핸들러 */
+  onSubmit?: (data: TFieldValues) => void | Promise<void>;
+  /** 리셋 핸들러 */
+  onReset?: () => void;
+  /** 값 변경 핸들러 */
+  onChange?: (name: string, value: any, values: TFieldValues) => void;
+}
+
+/**
  * 헤드리스 검색 박스 훅
  * @param config - 검색 폼 설정
+ * @param options - 이벤트 핸들러 옵션
  * @returns 검색 박스 제어 객체
  */
 export const useSearchBox = <TFieldValues extends FieldValues = FieldValues>(
-  config: SearchConfig<TFieldValues>
+  config: SearchConfig<TFieldValues>,
+  options: UseSearchBoxOptions<TFieldValues> = {}
 ): UseSearchBoxReturn<TFieldValues> => {
   // 기본값 설정
   // config.defaultValues와 field.defaultValue를 병합
@@ -81,21 +95,21 @@ export const useSearchBox = <TFieldValues extends FieldValues = FieldValues>(
     async (e?: React.BaseSyntheticEvent) => {
       e?.preventDefault();
       await rhfHandleSubmit(async (data) => {
-        if (config.onSubmit) {
-          await config.onSubmit(data);
+        if (options.onSubmit) {
+          await options.onSubmit(data);
         }
       })();
     },
-    [rhfHandleSubmit, config]
+    [rhfHandleSubmit, options]
   );
 
   // 리셋 핸들러
   const handleReset = useCallback(() => {
     reset(defaultValues as any);
-    if (config.onReset) {
-      config.onReset();
+    if (options.onReset) {
+      options.onReset();
     }
-  }, [reset, defaultValues, config]);
+  }, [reset, defaultValues, options]);
 
   // 필드 값 변경 핸들러
   const handleFieldChange = useCallback(
@@ -109,15 +123,7 @@ export const useSearchBox = <TFieldValues extends FieldValues = FieldValues>(
     [setValue]
   );
 
-  // onChange 콜백 처리
-  useEffect(() => {
-    if (config.onChange) {
-      const subscription = watch((data) => {
-        config.onChange!(data as TFieldValues);
-      });
-      return () => subscription.unsubscribe();
-    }
-  }, [watch, config]);
+  // onChange 콜백 처리 (제거 - 이제 컴포넌트 레벨에서 처리)
 
   // 자동 제출 처리
   useEffect(() => {

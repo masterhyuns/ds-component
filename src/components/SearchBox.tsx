@@ -30,6 +30,9 @@ const defaultFieldComponents: Record<string, React.ComponentType<FieldRenderProp
  */
 export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
   config,
+  onSubmit,
+  onReset,
+  onChange,
   customComponents = {},
   className,
   style,
@@ -41,7 +44,7 @@ export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
     handleSubmit,
     handleReset,
     isSubmitting,
-  } = useSearchBox(config);
+  } = useSearchBox(config, { onSubmit, onReset, onChange });
 
   const { formState: { errors } } = form;
 
@@ -71,7 +74,10 @@ export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
         field,
         form: form as any,
         value: form.watch(field.name as any),
-        onChange: (value) => form.setValue(field.name as any, value),
+        onChange: (value) => {
+          form.setValue(field.name as any, value);
+          onChange?.(field.name, value, form.getValues());
+        },
         error: errors[field.name]?.message as string,
       });
     }
@@ -92,7 +98,10 @@ export function SearchBox<TFieldValues extends FieldValues = FieldValues>({
         field={field as any}
         form={form as any}
         value={form.watch(field.name as any)}
-        onChange={(value) => form.setValue(field.name as any, value)}
+        onChange={(value) => {
+          form.setValue(field.name as any, value);
+          onChange?.(field.name, value, form.getValues());
+        }}
         error={errors[field.name]?.message as string}
       />
     );

@@ -153,12 +153,6 @@ export interface SearchConfig<T = any> {
     /** 방향 */
     direction?: 'horizontal' | 'vertical';
   };
-  /** 제출 핸들러 */
-  onSubmit?: (data: T) => void | Promise<void>;
-  /** 리셋 핸들러 */
-  onReset?: () => void;
-  /** 변경 핸들러 */
-  onChange?: (data: T) => void;
   /** 자동 제출 */
   autoSubmit?: boolean;
   /** 자동 제출 지연 (ms) */
@@ -255,6 +249,12 @@ export interface FieldComponentProps {
 export interface SearchBoxProps<TFieldValues extends FieldValues = FieldValues> {
   /** 검색 폼 설정 */
   config: SearchConfig<TFieldValues>;
+  /** 제출 핸들러 */
+  onSubmit?: (data: TFieldValues) => void | Promise<void>;
+  /** 리셋 핸들러 */
+  onReset?: () => void;
+  /** 값 변경 핸들러 */
+  onChange?: (name: string, value: any, values: TFieldValues) => void;
   /** 커스텀 필드 컴포넌트 매핑 */
   customComponents?: Record<string, ComponentType<FieldRenderProps>>;
   /** 스타일 클래스명 */

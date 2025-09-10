@@ -46,10 +46,10 @@ export const Default: Story = {
           ],
         },
       ],
-      onSubmit: (data: any) => {
-        console.log('검색 데이터:', data);
-        alert(JSON.stringify(data, null, 2));
-      },
+    },
+    onSubmit: (data: any) => {
+      console.log('검색 데이터:', data);
+      alert(JSON.stringify(data, null, 2));
     },
   },
 };
@@ -113,9 +113,9 @@ export const ComplexForm: Story = {
           order: 4,
         },
       ],
-      onSubmit: (data: any) => {
-        console.log('검색 데이터:', data);
-      },
+    },
+    onSubmit: (data: any) => {
+      console.log('검색 데이터:', data);
     },
   },
 };
@@ -172,9 +172,9 @@ export const ConditionalFields: Story = {
           showWhen: (values: any) => values.searchType === 'advanced',
         },
       ],
-      onSubmit: (data: any) => {
-        console.log('검색 데이터:', data);
-      },
+    },
+    onSubmit: (data: any) => {
+      console.log('검색 데이터:', data);
     },
   },
 };
@@ -206,9 +206,9 @@ export const HeadlessMode: Story = {
           ],
         },
       ],
-      onSubmit: (data: any) => {
-        console.log('검색 데이터:', data);
-      },
+    },
+    onSubmit: (data: any) => {
+      console.log('검색 데이터:', data);
     },
     render: ({ fields, submitButton, resetButton }: any) => (
       <div style={{ 
@@ -254,12 +254,12 @@ export const AutoSubmit: Story = {
       autoSubmit: true,
       autoSubmitDelay: 500,
       showButtons: false,
-      onSubmit: (data: any) => {
-        console.log('자동 검색:', data);
-      },
-      onChange: (data: any) => {
-        console.log('값 변경:', data);
-      },
+    },
+    onSubmit: (data: any) => {
+      console.log('자동 검색:', data);
+    },
+    onChange: (_name: string, _value: any, data: any) => {
+      console.log('값 변경:', data);
     },
   },
 };
@@ -301,10 +301,10 @@ export const WithValidation: Story = {
           },
         },
       ],
-      onSubmit: (data: any) => {
-        console.log('유효한 데이터:', data);
-        alert('검증 통과!');
-      },
+    },
+    onSubmit: (data: any) => {
+      console.log('유효한 데이터:', data);
+      alert('검증 통과!');
     },
   },
 };
@@ -361,15 +361,15 @@ export const DateSearch: Story = {
           defaultValue: false
         }
       ],
-      onSubmit: (data: any) => {
-        console.log('날짜 검색 조건:', data);
-        alert('검색 조건:\n' + JSON.stringify(data, null, 2));
-      },
-      onReset: () => {
-        console.log('검색 조건 초기화');
-      },
       submitText: '검색',
       resetText: '초기화',
+    },
+    onSubmit: (data: any) => {
+      console.log('날짜 검색 조건:', data);
+      alert('검색 조건:\n' + JSON.stringify(data, null, 2));
+    },
+    onReset: () => {
+      console.log('검색 조건 초기화');
     },
   },
 };
