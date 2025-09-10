@@ -68,44 +68,6 @@ export const DateSearchExample: React.FC = () => {
       columns: 2,
       gap: '1rem',
     },
-    onSubmit: async (data) => {
-      console.log('검색 조건:', data);
-      setIsSearching(true);
-
-      // 검색 시뮬레이션
-      setTimeout(() => {
-        let filtered = [...mockData];
-
-        // 생성일 필터링
-        if (data.createdDate) {
-          filtered = filtered.filter(item => 
-            item.createdAt === data.createdDate
-          );
-        }
-
-        // 프로젝트 기간 필터링
-        if (data.projectPeriod) {
-          const { start, end } = data.projectPeriod;
-          if (start) {
-            filtered = filtered.filter(item => 
-              item.startDate >= start
-            );
-          }
-          if (end) {
-            filtered = filtered.filter(item => 
-              item.endDate <= end
-            );
-          }
-        }
-
-        setResults(filtered);
-        setIsSearching(false);
-      }, 500);
-    },
-    onReset: () => {
-      setResults(mockData);
-      console.log('검색 조건 초기화');
-    },
     submitText: '검색',
     resetText: '초기화',
   };
@@ -122,7 +84,47 @@ export const DateSearchExample: React.FC = () => {
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         marginBottom: '2rem'
       }}>
-        <SearchBox config={searchConfig} />
+        <SearchBox 
+          config={searchConfig}
+          onSubmit={async (data: any) => {
+            console.log('검색 조건:', data);
+            setIsSearching(true);
+
+            // 검색 시뮬레이션
+            setTimeout(() => {
+              let filtered = [...mockData];
+
+              // 생성일 필터링
+              if (data.createdDate) {
+                filtered = filtered.filter(item => 
+                  item.createdAt === data.createdDate
+                );
+              }
+
+              // 프로젝트 기간 필터링
+              if (data.projectPeriod) {
+                const { start, end } = data.projectPeriod;
+                if (start) {
+                  filtered = filtered.filter(item => 
+                    item.startDate >= start
+                  );
+                }
+                if (end) {
+                  filtered = filtered.filter(item => 
+                    item.endDate <= end
+                  );
+                }
+              }
+
+              setResults(filtered);
+              setIsSearching(false);
+            }, 500);
+          }}
+          onReset={() => {
+            setResults(mockData);
+            console.log('검색 조건 초기화');
+          }}
+        />
       </div>
 
       {/* 검색 결과 */}

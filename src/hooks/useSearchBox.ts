@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useCallback } from 'react';
 import { useForm, FieldValues, UseFormReturn, Path } from 'react-hook-form';
-import { SearchConfig, FieldMeta } from '../types/types';
+import { SearchConfig, FieldMeta, SearchEventHandlers } from '../types/types';
 
 /**
  * 검색 박스 훅의 반환 타입
@@ -30,14 +30,7 @@ export interface UseSearchBoxReturn<TFieldValues extends FieldValues = FieldValu
 /**
  * 검색 박스 훅 옵션 타입
  */
-export interface UseSearchBoxOptions<TFieldValues extends FieldValues = FieldValues> {
-  /** 제출 핸들러 */
-  onSubmit?: (data: TFieldValues) => void | Promise<void>;
-  /** 리셋 핸들러 */
-  onReset?: () => void;
-  /** 값 변경 핸들러 */
-  onChange?: (name: string, value: any, values: TFieldValues) => void;
-}
+export type UseSearchBoxOptions<TFieldValues extends FieldValues = FieldValues> = SearchEventHandlers<TFieldValues>;
 
 /**
  * 헤드리스 검색 박스 훅

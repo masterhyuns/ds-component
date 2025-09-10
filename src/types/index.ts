@@ -213,16 +213,28 @@ export type FieldProps = FieldRenderProps;
 // ========================================
 
 /**
+ * 검색 이벤트 핸들러 옵션 (SearchBox, SearchProvider 공통)
+ */
+export interface SearchEventHandlers<TFieldValues extends FieldValues = FieldValues> {
+  /** 제출 핸들러 */
+  onSubmit?: (data: TFieldValues) => void | Promise<void>;
+  /** 리셋 핸들러 */
+  onReset?: () => void;
+  /** 값 변경 핸들러 */
+  onChange?: (name: string, value: any, values: TFieldValues) => void;
+}
+
+/**
  * SearchProvider Props
  * 새로운 API의 Provider 컴포넌트 Props
  */
-export interface SearchProviderProps {
+export interface SearchProviderProps<TFieldValues extends FieldValues = FieldValues> extends SearchEventHandlers<TFieldValues> {
   /** 검색 설정 */
-  config: SearchConfig;
+  config: SearchConfig<TFieldValues>;
   /** 자식 컴포넌트 */
   children: ReactNode;
   /** 초기값 (URL, localStorage 등에서 복원) */
-  initialValues?: FieldValues;
+  initialValues?: TFieldValues;
 }
 
 /**
@@ -246,15 +258,9 @@ export interface FieldComponentProps {
  * 레거시 SearchBox Props
  * 기존 SearchBox 컴포넌트와의 호환성 유지
  */
-export interface SearchBoxProps<TFieldValues extends FieldValues = FieldValues> {
+export interface SearchBoxProps<TFieldValues extends FieldValues = FieldValues> extends SearchEventHandlers<TFieldValues> {
   /** 검색 폼 설정 */
   config: SearchConfig<TFieldValues>;
-  /** 제출 핸들러 */
-  onSubmit?: (data: TFieldValues) => void | Promise<void>;
-  /** 리셋 핸들러 */
-  onReset?: () => void;
-  /** 값 변경 핸들러 */
-  onChange?: (name: string, value: any, values: TFieldValues) => void;
   /** 커스텀 필드 컴포넌트 매핑 */
   customComponents?: Record<string, ComponentType<FieldRenderProps>>;
   /** 스타일 클래스명 */

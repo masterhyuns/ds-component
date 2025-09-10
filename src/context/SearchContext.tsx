@@ -37,6 +37,9 @@ const SearchContext = createContext<SearchContextValue | null>(null);
  */
 export const SearchProvider: React.FC<SearchProviderProps> = ({
   config,
+  onSubmit,
+  onReset,
+  onChange,
   children,
   initialValues,
 }) => {
@@ -83,11 +86,11 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
   // 폼 API 구현 (react-hook-form 추상화)
   // 사용자가 실제로 사용할 깔끔한 API
   const formAPI: SearchFormAPI = useMemo(() => ({
-    // 폼 제출 - rhfHandleSubmit을 래핑하여 config.onSubmit 호출
+    // 폼 제출 - rhfHandleSubmit을 래핑하여 onSubmit 호출
     submit: async () => {
       await rhfHandleSubmit(async (data) => {
-        if (config.onSubmit) {
-          await config.onSubmit(data);
+        if (onSubmit) {
+          await onSubmit(data);
         }
       })(); // 즉시 실행을 위해 () 추가
     },
@@ -95,8 +98,8 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     // 폼 초기화 - 기본값으로 리셋하고 onReset 콜백 실행
     reset: () => {
       rhfReset(defaultValues);
-      if (config.onReset) {
-        config.onReset();
+      if (onReset) {
+        onReset();
       }
     },
     
@@ -122,6 +125,10 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
         shouldValidate: true,  // 유효성 검사 실행
         shouldDirty: true      // dirty 상태로 표시
       });
+      // onChange 콜백 호출
+      if (onChange) {
+        onChange(name, value, rhfGetValues());
+      }
     },
     
     // 전체 폼 유효성 검사 수동 실행
@@ -160,22 +167,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     [config.fields]
   );
 
-  // onChange 콜백 처리
-  // 폼 값이 변경될 때마다 config.onChange 콜백 실행
-  useEffect(() => {
-    // onChange가 정의되어 있지 않으면 early return
-    if (!config.onChange) {
-      return;
-    }
-    
-    // watch()는 구독을 반환하며, 값이 변경될 때마다 콜백 실행
-    const subscription = watch((data) => {
-      config.onChange!(data as FieldValues);
-    });
-    
-    // 컴포넌트 언마운트 시 구독 해제
-    return () => subscription.unsubscribe();
-  }, [watch, config]);
+  // onChange 콜백은 이제 setValue에서 처리됨
 
   // 자동 제출 처리
   // autoSubmit이 true면 값 변경 후 지정된 시간(기본 500ms) 후 자동 제출

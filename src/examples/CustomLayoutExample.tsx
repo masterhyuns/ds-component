@@ -95,14 +95,16 @@ export const CustomLayoutExample: React.FC<CustomLayoutExampleProps> = ({ onSubm
         ],
       },
     ],
-    onSubmit: async (data) => {
-      console.log('제출:', data);
-      onSubmit?.(data);
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data) => {
+        console.log('제출:', data);
+        onSubmit?.(data);
+      }}
+    >
       <div style={{ 
         backgroundColor: '#f3f4f6', 
         padding: '2rem', 

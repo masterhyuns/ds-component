@@ -85,14 +85,16 @@ export const ArrayFieldsExample: React.FC<ArrayFieldsExampleProps> = ({ onSubmit
     defaultValues: {
       products: [{ name: '샘플 제품', price: '10000' }],
     },
-    onSubmit: async (data) => {
-      console.log('제품 목록:', data);
-      onSubmit?.(data);
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data) => {
+        console.log('제품 목록:', data);
+        onSubmit?.(data);
+      }}
+    >
       <div style={{ 
         backgroundColor: 'white', 
         padding: '2rem', 

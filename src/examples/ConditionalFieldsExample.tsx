@@ -80,14 +80,16 @@ export const ConditionalFieldsExample: React.FC<ConditionalFieldsExampleProps> =
         showWhen: (values) => values.searchType === 'advanced',
       },
     ],
-    onSubmit: async (data) => {
-      console.log('검색:', data);
-      onSubmit?.(data);
-    },
   };
 
   return (
-    <SearchProvider config={config}>
+    <SearchProvider 
+      config={config}
+      onSubmit={async (data) => {
+        console.log('검색:', data);
+        onSubmit?.(data);
+      }}
+    >
       <div style={{ 
         backgroundColor: 'white', 
         padding: '2rem', 
@@ -95,7 +97,8 @@ export const ConditionalFieldsExample: React.FC<ConditionalFieldsExampleProps> =
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
       }}>
         <h2 style={{ marginBottom: '1.5rem' }}>🎯 조건부 필드</h2>
-        <Field name="searchType" />
+        <
+          Field name="searchType" />
         <SearchTypeIndicator />
         <Field name="keyword" />
         <Field name="category" />
