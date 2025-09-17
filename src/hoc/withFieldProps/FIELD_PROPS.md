@@ -151,18 +151,6 @@ const wrappedComponents = wrapMultipleComponents([
 const { TextInput, Checkbox, DatePicker, NumberInput } = wrappedComponents;
 ```
 
-### 3. 디버깅 모드
-
-```typescript
-import { enableFieldPropsDebug } from '@/hoc/withFieldProps';
-
-// 개발 환경에서 디버깅 모드 활성화
-if (process.env.NODE_ENV === 'development') {
-  enableFieldPropsDebug(true);
-}
-
-// 이제 모든 props 매핑 과정이 콘솔에 출력됩니다
-```
 
 ## 🛠️ 실제 사용 예제
 
@@ -231,40 +219,15 @@ const config = {
 
 ## 🔍 디버깅 가이드
 
-### 1. 매핑 확인
+### 매핑 확인
 
 ```typescript
-import { getFieldMapping, validateMapping } from '@/hoc/withFieldProps';
+import { getFieldMapping } from '@/hoc/withFieldProps';
 
 // 특정 필드 타입의 매핑 확인
 const checkboxMapping = getFieldMapping('checkbox');
 console.log(checkboxMapping);
 // { value: 'checked', onChange: 'onCheckedChange', onBlur: 'onBlur' }
-
-// 매핑 유효성 검사
-const validation = validateMapping(checkboxMapping);
-if (!validation.isValid) {
-  console.error('Invalid mapping:', validation.errors);
-}
-```
-
-### 2. 전체 매핑 조회
-
-```typescript
-import { getAllFieldMappings } from '@/hoc/withFieldProps';
-
-// 모든 등록된 매핑 확인
-const allMappings = getAllFieldMappings();
-console.table(allMappings);
-```
-
-### 3. 런타임 디버깅
-
-```javascript
-// 브라우저 콘솔에서 사용
-__WITH_FIELD_PROPS__.enableDebug(true);  // 디버깅 활성화
-__WITH_FIELD_PROPS__.getAllMappings();   // 모든 매핑 조회
-__WITH_FIELD_PROPS__.isReady();          // 모듈 준비 상태 확인
 ```
 
 ## ⚠️ 주의사항 및 제한사항

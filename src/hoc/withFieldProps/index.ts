@@ -8,7 +8,7 @@
  * 제공되는 주요 기능:
  * - withFieldProps: 메인 HOC 함수
  * - FIELD_PROPS_MAPPING: 필드 타입별 매핑 설정
- * - 유틸리티 함수들: 매핑 관리, 디버깅 등
+ * - 유틸리티 함수들: 매핑 관리
  * - 타입 정의들: TypeScript 지원
  * 
  * @author Enterprise Platform Technical Lead
@@ -23,8 +23,7 @@
  * import { 
  *   withFieldProps, 
  *   FIELD_PROPS_MAPPING, 
- *   registerFieldMapping,
- *   enableFieldPropsDebug 
+ *   registerFieldMapping
  * } from '@/hoc/withFieldProps';
  * ```
  */
