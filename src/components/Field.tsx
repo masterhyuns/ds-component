@@ -21,21 +21,40 @@ import { useSearchContext } from '../context/SearchContext';
 import { FieldComponentProps } from '../types/search.types';
 import { TextField } from './fields/TextField';
 import { SelectField } from './fields/SelectField';
+import { DateField } from './fields/DateField';
+import { DateRangeField } from './fields/DateRangeField';
+import { withFieldProps } from './withFieldProps';
 
 /**
  * 필드 타입별 기본 컴포넌트 매핑
- * 사용자가 커스텀 컴포넌트를 지정하지 않았을 때 사용되는 기본 컴포넌트
+ * 각 컴포넌트는 withFieldProps HOC로 래핑되어 일관된 props 인터페이스를 제공
  * 필드의 type 속성에 따라 자동으로 선택됨
+ * 
+ * HOC 래핑 효과:
+ * - 표준 props (value, onChange, onBlur) → 컴포넌트별 props 자동 매핑
+ * - 타입 안전성 보장
+ * - 일관된 API 제공
  */
 const defaultFieldComponents: Record<string, React.ComponentType<any>> = {
-  text: TextField,      // 텍스트 입력 필드
-  select: SelectField,  // 드롭다운 선택 필드
-  // TODO: 추가 필드 타입 컴포넌트
-  // number: NumberField,
-  // date: DateField,
-  // checkbox: CheckboxField,
-  // radio: RadioField,
-  // textarea: TextareaField,
+  // 기본 입력 필드들 (표준 props 사용)
+  text: withFieldProps(TextField, 'text'),
+  select: withFieldProps(SelectField, 'select'),
+  
+  // 날짜 관련 필드들
+  date: withFieldProps(DateField, 'date'),
+  daterange: withFieldProps(DateRangeField, 'daterange'),
+  
+  // TODO: 추가 필드 타입 컴포넌트 (HOC로 래핑 예정)
+  // number: withFieldProps(NumberField, 'number'),
+  // numberrange: withFieldProps(NumberRangeField, 'numberrange'),
+  // checkbox: withFieldProps(CheckboxField, 'checkbox'),
+  // radio: withFieldProps(RadioField, 'radio'),
+  // multiselect: withFieldProps(MultiSelectField, 'multiselect'),
+  // autocomplete: withFieldProps(AutocompleteField, 'autocomplete'),
+  // file: withFieldProps(FileField, 'file'),
+  // tags: withFieldProps(TagsField, 'tags'),
+  // textarea: withFieldProps(TextareaField, 'textarea'),
+  // hidden: withFieldProps(HiddenField, 'hidden'),
 };
 
 /**

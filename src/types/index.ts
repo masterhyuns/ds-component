@@ -169,6 +169,31 @@ export interface SearchConfig<T = any> {
 
 
 // ========================================
+// 필드 Props 매핑 관련
+// ========================================
+
+/**
+ * 단일 필드 컴포넌트의 props 매핑 정의
+ * 표준 props 이름 → 실제 컴포넌트 props 이름 매핑
+ */
+export interface FieldPropsMapping {
+  /** 값 속성 매핑 (예: value → checked, value → selected) */
+  value: string;
+  /** 변경 핸들러 매핑 (예: onChange → onCheckedChange, onChange → onSelect) */
+  onChange: string;
+  /** 블러 핸들러 매핑 (예: onBlur → onBlur) */
+  onBlur?: string;
+  /** 추가 props 매핑 (컴포넌트별 특수 props) */
+  [key: string]: string | undefined;
+}
+
+/**
+ * 모든 필드 타입별 props 매핑 설정
+ * 각 필드 타입에 대해 어떻게 props를 매핑할지 정의
+ */
+export type FieldPropsMappingConfig = Partial<Record<SearchFieldType, FieldPropsMapping>>;
+
+// ========================================
 // 통합 필드 렌더링 Props
 // ========================================
 
