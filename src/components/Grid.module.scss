@@ -1,0 +1,324 @@
+/**
+ * Grid 컴포넌트 스타일 모듈
+ * CSS Grid 기반 2차원 레이아웃 시스템
+ */
+
+// ========================================
+// 브레이크포인트 및 미디어 쿼리
+// ========================================
+
+$breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px
+) !default;
+
+// 미디어 쿼리 믹스인
+@mixin media-up($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    $min-width: map-get($breakpoints, $breakpoint);
+    @if $min-width > 0 {
+      @media (min-width: $min-width) {
+        @content;
+      }
+    } @else {
+      @content;
+    }
+  }
+}
+
+@mixin media-down($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    $max-width: map-get($breakpoints, $breakpoint) - 1px;
+    @media (max-width: $max-width) {
+      @content;
+    }
+  }
+}
+
+// ========================================
+// CSS 변수를 활용한 반응형 그리드 시스템
+// ========================================
+
+.grid {
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  
+  // 기본 그리드 설정
+  grid-template-columns: repeat(var(--grid-columns, 12), 1fr);
+  gap: var(--grid-gap, 1rem);
+  
+  // 행과 열 간격이 따로 설정된 경우
+  row-gap: var(--grid-row-gap, var(--grid-gap, 1rem));
+  column-gap: var(--grid-column-gap, var(--grid-gap, 1rem));
+  
+  // 정렬 설정
+  align-items: var(--grid-align-items, stretch);
+  justify-content: var(--grid-justify-content, stretch);
+  
+  // 최대 너비 설정
+  max-width: var(--grid-max-width, none);
+  margin-left: auto;
+  margin-right: auto;
+  
+  // 패딩 설정
+  padding: var(--grid-padding, 0);
+  
+  // 자동 크기 조정 모드
+  &[style*="--grid-auto-fit: true"] {
+    grid-template-columns: repeat(
+      auto-fit, 
+      minmax(
+        var(--grid-min-column-width, 200px), 
+        var(--grid-max-column-width, 1fr)
+      )
+    );
+  }
+  
+  // 동일한 높이 모드
+  &--equal-height {
+    align-items: stretch;
+    
+    .gridItem {
+      display: flex;
+      flex-direction: column;
+      
+      > * {
+        flex: 1;
+      }
+    }
+  }
+  
+  // 반응형 컬럼 수 설정
+  @each $breakpoint, $min-width in $breakpoints {
+    @include media-up($breakpoint) {
+      grid-template-columns: repeat(var(--grid-columns-#{$breakpoint}, var(--grid-columns, 12)), 1fr);
+      
+      // 자동 크기 조정 모드의 반응형 설정
+      &[style*="--grid-auto-fit-#{$breakpoint}: true"] {
+        grid-template-columns: repeat(
+          auto-fit, 
+          minmax(
+            var(--grid-min-column-width-#{$breakpoint}, var(--grid-min-column-width, 200px)), 
+            var(--grid-max-column-width-#{$breakpoint}, var(--grid-max-column-width, 1fr))
+          )
+        );
+      }
+      
+      // 간격 반응형 설정
+      gap: var(--grid-gap-#{$breakpoint}, var(--grid-gap, 1rem));
+      row-gap: var(--grid-row-gap-#{$breakpoint}, var(--grid-row-gap, var(--grid-gap-#{$breakpoint}, var(--grid-gap, 1rem))));
+      column-gap: var(--grid-column-gap-#{$breakpoint}, var(--grid-column-gap, var(--grid-gap-#{$breakpoint}, var(--grid-gap, 1rem))));
+      
+      // 정렬 반응형 설정
+      align-items: var(--grid-align-items-#{$breakpoint}, var(--grid-align-items, stretch));
+      justify-content: var(--grid-justify-content-#{$breakpoint}, var(--grid-justify-content, stretch));
+      
+      // 패딩 반응형 설정
+      padding: var(--grid-padding-#{$breakpoint}, var(--grid-padding, 0));
+    }
+  }
+}
+
+// ========================================
+// Grid Item 스타일
+// ========================================
+
+.gridItem {
+  box-sizing: border-box;
+  
+  // 기본 그리드 아이템 설정
+  grid-column: span var(--grid-col-span, 1);
+  grid-row: span var(--grid-row-span, auto);
+  
+  // 시작/끝 위치 설정
+  grid-column-start: var(--grid-col-start, auto);
+  grid-column-end: var(--grid-col-end, auto);
+  grid-row-start: var(--grid-row-start, auto);
+  grid-row-end: var(--grid-row-end, auto);
+  
+  // 개별 정렬 설정
+  align-self: var(--grid-align-self, auto);
+  justify-self: var(--grid-justify-self, auto);
+  
+  // 순서 설정
+  order: var(--grid-order, 0);
+  
+  // 패딩과 마진
+  padding: var(--grid-item-padding, 0);
+  margin: var(--grid-item-margin, 0);
+  
+  // 높이 설정
+  min-height: var(--grid-item-min-height, auto);
+  max-height: var(--grid-item-max-height, none);
+  
+  // 숨김 처리
+  &[style*="--grid-item-hidden: true"] {
+    display: none;
+  }
+  
+  // 반응형 설정
+  @each $breakpoint, $min-width in $breakpoints {
+    @include media-up($breakpoint) {
+      // 컬럼/행 span 반응형
+      grid-column: span var(--grid-col-span-#{$breakpoint}, var(--grid-col-span, 1));
+      grid-row: span var(--grid-row-span-#{$breakpoint}, var(--grid-row-span, auto));
+      
+      // 시작/끝 위치 반응형
+      grid-column-start: var(--grid-col-start-#{$breakpoint}, var(--grid-col-start, auto));
+      grid-column-end: var(--grid-col-end-#{$breakpoint}, var(--grid-col-end, auto));
+      grid-row-start: var(--grid-row-start-#{$breakpoint}, var(--grid-row-start, auto));
+      grid-row-end: var(--grid-row-end-#{$breakpoint}, var(--grid-row-end, auto));
+      
+      // 정렬 반응형
+      align-self: var(--grid-align-self-#{$breakpoint}, var(--grid-align-self, auto));
+      justify-self: var(--grid-justify-self-#{$breakpoint}, var(--grid-justify-self, auto));
+      
+      // 순서 반응형
+      order: var(--grid-order-#{$breakpoint}, var(--grid-order, 0));
+      
+      // 패딩과 마진 반응형
+      padding: var(--grid-item-padding-#{$breakpoint}, var(--grid-item-padding, 0));
+      margin: var(--grid-item-margin-#{$breakpoint}, var(--grid-item-margin, 0));
+      
+      // 높이 반응형
+      min-height: var(--grid-item-min-height-#{$breakpoint}, var(--grid-item-min-height, auto));
+      max-height: var(--grid-item-max-height-#{$breakpoint}, var(--grid-item-max-height, none));
+      
+      // 숨김 반응형 처리
+      &[style*="--grid-item-hidden-#{$breakpoint}: true"] {
+        display: none;
+      }
+      
+      &[style*="--grid-item-hidden-#{$breakpoint}: false"] {
+        display: block;
+      }
+    }
+  }
+}
+
+// ========================================
+// 유틸리티 클래스
+// ========================================
+
+// 컬럼 span 유틸리티 클래스
+@for $i from 1 through 12 {
+  .col-#{$i} {
+    grid-column: span #{$i};
+  }
+  
+  .col-start-#{$i} {
+    grid-column-start: #{$i};
+  }
+  
+  .col-end-#{$i} {
+    grid-column-end: #{$i};
+  }
+}
+
+// 행 span 유틸리티 클래스
+@for $i from 1 through 6 {
+  .row-#{$i} {
+    grid-row: span #{$i};
+  }
+  
+  .row-start-#{$i} {
+    grid-row-start: #{$i};
+  }
+  
+  .row-end-#{$i} {
+    grid-row-end: #{$i};
+  }
+}
+
+// 반응형 유틸리티 클래스
+@each $breakpoint, $min-width in $breakpoints {
+  @include media-up($breakpoint) {
+    // 컬럼 span 반응형
+    @for $i from 1 through 12 {
+      .col-#{$breakpoint}-#{$i} {
+        grid-column: span #{$i};
+      }
+      
+      .col-#{$breakpoint}-start-#{$i} {
+        grid-column-start: #{$i};
+      }
+      
+      .col-#{$breakpoint}-end-#{$i} {
+        grid-column-end: #{$i};
+      }
+    }
+    
+    // 행 span 반응형
+    @for $i from 1 through 6 {
+      .row-#{$breakpoint}-#{$i} {
+        grid-row: span #{$i};
+      }
+      
+      .row-#{$breakpoint}-start-#{$i} {
+        grid-row-start: #{$i};
+      }
+      
+      .row-#{$breakpoint}-end-#{$i} {
+        grid-row-end: #{$i};
+      }
+    }
+    
+    // 숨김 유틸리티
+    .hidden-#{$breakpoint} {
+      display: none;
+    }
+    
+    .visible-#{$breakpoint} {
+      display: block;
+    }
+  }
+}
+
+// ========================================
+// 정렬 유틸리티 클래스
+// ========================================
+
+.align-start { align-self: start; }
+.align-end { align-self: end; }
+.align-center { align-self: center; }
+.align-stretch { align-self: stretch; }
+.align-baseline { align-self: baseline; }
+
+.justify-start { justify-self: start; }
+.justify-end { justify-self: end; }
+.justify-center { justify-self: center; }
+.justify-stretch { justify-self: stretch; }
+
+// 순서 유틸리티 클래스
+@for $i from -5 through 5 {
+  .order-#{$i} {
+    order: #{$i};
+  }
+}
+
+// 반응형 정렬 및 순서 유틸리티
+@each $breakpoint, $min-width in $breakpoints {
+  @include media-up($breakpoint) {
+    .align-#{$breakpoint}-start { align-self: start; }
+    .align-#{$breakpoint}-end { align-self: end; }
+    .align-#{$breakpoint}-center { align-self: center; }
+    .align-#{$breakpoint}-stretch { align-self: stretch; }
+    .align-#{$breakpoint}-baseline { align-self: baseline; }
+
+    .justify-#{$breakpoint}-start { justify-self: start; }
+    .justify-#{$breakpoint}-end { justify-self: end; }
+    .justify-#{$breakpoint}-center { justify-self: center; }
+    .justify-#{$breakpoint}-stretch { justify-self: stretch; }
+    
+    @for $i from -5 through 5 {
+      .order-#{$breakpoint}-#{$i} {
+        order: #{$i};
+      }
+    }
+  }
+}

@@ -12,6 +12,9 @@ export { SearchButtons } from './components/SearchButtons';
 export { TextField } from './components/fields/TextField';
 export { SelectField } from './components/fields/SelectField';
 
+// 레이아웃 컴포넌트
+export { Grid, GridItem } from './components/Grid';
+
 // 훅
 export {
   useField,
@@ -37,6 +40,19 @@ export type {
   SearchFormAPI,
   SearchContextValue,
 } from './types/search.types';
+
+// Grid 레이아웃 타입
+export type {
+  GridProps,
+  GridItemProps,
+  ResponsiveValue,
+  BreakpointKey,
+  GridAlignment,
+  GridJustification,
+  SpacingSize,
+  GridThemeConfig,
+  BreakpointConfig,
+} from './types';
 
 // 레거시 컴포넌트 (deprecated)
 export { SearchBox } from './components/SearchBox';

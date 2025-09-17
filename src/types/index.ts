@@ -4,7 +4,7 @@
  * 중복 제거 및 타입 별칭을 통한 하위 호환성 유지
  */
 
-import { ReactNode, ComponentType } from 'react';
+import React, { ReactNode, ComponentType } from 'react';
 import { Control, UseFormReturn, UseFormRegister } from 'react-hook-form';
 
 // ========================================
@@ -412,3 +412,148 @@ export interface SearchResult<T = any> {
  * 검색 폼 버튼의 정렬 방식
  */
 export type ButtonAlignment = 'left' | 'center' | 'right';
+
+// ========================================
+// Grid 레이아웃 관련 타입
+// ========================================
+
+/**
+ * 반응형 브레이크포인트 타입
+ * CSS 미디어 쿼리 기준점 정의
+ */
+export type BreakpointKey = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+
+/**
+ * 반응형 값 타입
+ * 브레이크포인트별로 다른 값을 설정할 수 있는 타입
+ */
+export type ResponsiveValue<T> = T | Partial<Record<BreakpointKey, T>>;
+
+/**
+ * 그리드 컨테이너 정렬 방식
+ * CSS align-items, justify-content 속성 값
+ */
+export type GridAlignment = 'start' | 'end' | 'center' | 'stretch' | 'baseline';
+export type GridJustification = 'start' | 'end' | 'center' | 'stretch' | 'space-between' | 'space-around' | 'space-evenly';
+
+/**
+ * 간격 크기 타입
+ * 미리 정의된 간격 또는 커스텀 값 사용 가능
+ */
+export type SpacingSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string;
+
+/**
+ * Grid 컨테이너 Props
+ * 2차원 레이아웃의 최상위 컨테이너 설정
+ */
+export interface GridProps {
+  /** 자식 컴포넌트들 */
+  children: ReactNode;
+  /** 컨테이너 HTML 태그 (기본: div) */
+  as?: keyof React.JSX.IntrinsicElements;
+  /** 총 컬럼 수 (반응형 지원) */
+  columns?: ResponsiveValue<number>;
+  /** 행과 열 간격 (반응형 지원) */
+  gap?: ResponsiveValue<SpacingSize>;
+  /** 행 간격만 설정 (gap보다 우선순위 높음) */
+  rowGap?: ResponsiveValue<SpacingSize>;
+  /** 열 간격만 설정 (gap보다 우선순위 높음) */
+  columnGap?: ResponsiveValue<SpacingSize>;
+  /** 수직 정렬 방식 */
+  alignItems?: ResponsiveValue<GridAlignment>;
+  /** 수평 정렬 방식 */
+  justifyContent?: ResponsiveValue<GridJustification>;
+  /** 아이템들의 최소 높이 통일 */
+  equalHeight?: boolean;
+  /** 컨테이너 최대 너비 */
+  maxWidth?: string | number;
+  /** 컨테이너 패딩 */
+  padding?: ResponsiveValue<SpacingSize>;
+  /** 커스텀 CSS 클래스 */
+  className?: string;
+  /** 인라인 스타일 */
+  style?: React.CSSProperties;
+  /** 자동 크기 조정 (콘텐츠에 맞춰 컬럼 수 자동 결정) */
+  autoFit?: ResponsiveValue<boolean>;
+  /** 최소 컬럼 너비 (autoFit 사용 시) */
+  minColumnWidth?: ResponsiveValue<string | number>;
+  /** 최대 컬럼 너비 (autoFit 사용 시) */
+  maxColumnWidth?: ResponsiveValue<string | number>;
+}
+
+/**
+ * Grid 아이템 Props
+ * 개별 그리드 아이템의 배치 및 크기 설정
+ */
+export interface GridItemProps {
+  /** 자식 컴포넌트들 */
+  children: ReactNode;
+  /** 컨테이너 HTML 태그 (기본: div) */
+  as?: keyof React.JSX.IntrinsicElements;
+  /** 차지할 컬럼 수 (반응형 지원) */
+  colSpan?: ResponsiveValue<number>;
+  /** 차지할 행 수 (반응형 지원) */
+  rowSpan?: ResponsiveValue<number>;
+  /** 컬럼 시작 위치 (반응형 지원) */
+  colStart?: ResponsiveValue<number>;
+  /** 컬럼 끝 위치 (반응형 지원) */
+  colEnd?: ResponsiveValue<number>;
+  /** 행 시작 위치 (반응형 지원) */
+  rowStart?: ResponsiveValue<number>;
+  /** 행 끝 위치 (반응형 지원) */
+  rowEnd?: ResponsiveValue<number>;
+  /** 아이템별 정렬 방식 */
+  alignSelf?: ResponsiveValue<GridAlignment>;
+  /** 아이템별 수평 정렬 */
+  justifySelf?: ResponsiveValue<GridAlignment>;
+  /** 렌더링 순서 (CSS order) */
+  order?: ResponsiveValue<number>;
+  /** 아이템 패딩 */
+  padding?: ResponsiveValue<SpacingSize>;
+  /** 아이템 마진 */
+  margin?: ResponsiveValue<SpacingSize>;
+  /** 커스텀 CSS 클래스 */
+  className?: string;
+  /** 인라인 스타일 */
+  style?: React.CSSProperties;
+  /** 숨김 조건 (반응형 지원) */
+  hidden?: ResponsiveValue<boolean>;
+  /** 최소 높이 */
+  minHeight?: ResponsiveValue<string | number>;
+  /** 최대 높이 */
+  maxHeight?: ResponsiveValue<string | number>;
+}
+
+/**
+ * 브레이크포인트 설정 타입
+ * 반응형 디자인을 위한 화면 크기별 설정
+ */
+export interface BreakpointConfig {
+  /** 브레이크포인트 이름 */
+  name: BreakpointKey;
+  /** 최소 너비 (px) */
+  minWidth: number;
+  /** 최대 너비 (px, 선택적) */
+  maxWidth?: number;
+  /** 기본 컬럼 수 */
+  defaultColumns?: number;
+  /** 기본 간격 */
+  defaultGap?: SpacingSize;
+}
+
+/**
+ * Grid 테마 설정 타입
+ * 전체 Grid 시스템의 스타일 테마
+ */
+export interface GridThemeConfig {
+  /** 브레이크포인트 설정 */
+  breakpoints: Record<BreakpointKey, BreakpointConfig>;
+  /** 간격 스케일 정의 */
+  spacing: Record<string, string>;
+  /** 기본 컬럼 수 */
+  defaultColumns: number;
+  /** 기본 간격 */
+  defaultGap: SpacingSize;
+  /** 최대 컨테이너 너비 */
+  maxContainerWidth?: string;
+}
