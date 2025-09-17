@@ -23,7 +23,7 @@ import { TextField } from './fields/TextField';
 import { SelectField } from './fields/SelectField';
 import { DateField } from './fields/DateField';
 import { DateRangeField } from './fields/DateRangeField';
-import { withFieldProps } from './withFieldProps';
+import { withFieldProps } from '../hoc/withFieldProps';
 
 /**
  * 필드 타입별 기본 컴포넌트 매핑
