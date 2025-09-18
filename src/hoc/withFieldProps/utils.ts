@@ -52,8 +52,31 @@ export const mapStandardPropsToComponent = (
 
   const mappedProps: Record<string, any> = {};
   
-  // 모든 매핑을 동적으로 처리 (value, onChange, onBlur 포함)
+  // 핵심 표준 props 처리 (매핑되지 않으면 표준 이름 그대로 사용)
+  const coreProps = ['value', 'onChange', 'onBlur'];
+  
+  coreProps.forEach(propName => {
+    const mappedName = mapping[propName as keyof FieldPropsMapping];
+    const propValue = (standardProps as any)[propName];
+    
+    if (propValue !== undefined) {
+      if (mappedName) {
+        // 매핑된 이름으로 사용
+        mappedProps[mappedName] = propValue;
+      } else {
+        // 매핑이 없으면 표준 이름 그대로 사용
+        mappedProps[propName] = propValue;
+      }
+    }
+  });
+  
+  // 추가 매핑 처리 (value, onChange, onBlur 외의 다른 매핑들)
   Object.entries(mapping).forEach(([standardPropName, componentPropName]) => {
+    // 이미 처리된 핵심 props는 스킵
+    if (coreProps.includes(standardPropName)) {
+      return;
+    }
+    
     // 컴포넌트 prop 이름이 정의되어 있고, 해당 값이 존재하는 경우만 매핑
     if (componentPropName && (standardProps as any)[standardPropName] !== undefined) {
       mappedProps[componentPropName] = (standardProps as any)[standardPropName];
