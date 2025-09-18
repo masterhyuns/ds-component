@@ -23,11 +23,11 @@ import { FieldPropsMapping, SearchFieldType } from '../../types';
  * 
  * @description
  * 각 필드 타입에 대해 표준 props 이름을 실제 컴포넌트 props 이름으로 매핑
- * 새로운 필드 타입 추가 시 이 객체에 매핑 설정만 추가하면 됨
+ * 표준 props(value, onChange, onBlur)와 동일한 필드는 등록하지 않아도 됨
  * 
  * @example
  * ```typescript
- * // 새로운 필드 타입 추가
+ * // 새로운 필드 타입 추가 (다른 props 이름을 사용하는 경우만)
  * FIELD_PROPS_MAPPING.customSlider = {
  *   value: 'sliderValue',
  *   onChange: 'onSliderChange',
@@ -37,28 +37,20 @@ import { FieldPropsMapping, SearchFieldType } from '../../types';
  * 
  * @readonly 런타임에서 읽기 전용으로 사용 권장
  */
-export const FIELD_PROPS_MAPPING: Record<SearchFieldType, FieldPropsMapping> = {
+export const FIELD_PROPS_MAPPING: Partial<Record<SearchFieldType, FieldPropsMapping>> = {
   /**
    * 기본 텍스트 입력 필드
-   * @description 표준 HTML input[type="text"] 사용
+   * @description 표준 HTML input[type="text"] 사용 - 표준 props와 동일하므로 매핑 불필요
    * @props value, onChange, onBlur (표준)
    */
-  text: {
-    value: 'value',
-    onChange: 'onChange',
-    onBlur: 'onBlur'
-  },
+  // text: 표준 props와 동일하므로 매핑 생략
   
   /**
    * 드롭다운 선택 필드
-   * @description 표준 HTML select 사용
+   * @description 표준 HTML select 사용 - 표준 props와 동일하므로 매핑 불필요
    * @props value, onChange, onBlur (표준)
    */
-  select: {
-    value: 'value',
-    onChange: 'onChange',
-    onBlur: 'onBlur'
-  },
+  // select: 표준 props와 동일하므로 매핑 생략
   
   /**
    * 다중 선택 필드
@@ -87,11 +79,11 @@ export const FIELD_PROPS_MAPPING: Record<SearchFieldType, FieldPropsMapping> = {
   /**
    * 날짜 범위 선택 필드
    * @description 커스텀 날짜 범위 컴포넌트 또는 react-datepicker range
-   * @props value → value, onChange → onChange (범위 객체 처리)
+   * @props value는 표준, onChange → onChange (범위 객체 처리)
    * @example { startDate: Date, endDate: Date } 형태 값 처리
    */
   daterange: {
-    value: 'value',
+    // value: 표준과 동일하므로 생략
     onChange: 'onChange',
     onBlur: 'onBlur'
   },
@@ -182,39 +174,27 @@ export const FIELD_PROPS_MAPPING: Record<SearchFieldType, FieldPropsMapping> = {
   
   /**
    * 텍스트 영역 필드
-   * @description 여러 줄 텍스트 입력 컴포넌트
+   * @description 여러 줄 텍스트 입력 컴포넌트 - 표준 props와 동일하므로 매핑 불필요
    * @props value, onChange, onBlur (표준 textarea와 동일)
    * @example TextareaField에서 표준 textarea props 사용
    */
-  textarea: {
-    value: 'value',
-    onChange: 'onChange',
-    onBlur: 'onBlur'
-  },
+  // textarea: 표준 props와 동일하므로 매핑 생략
   
   /**
    * 숨김 필드
-   * @description 폼 데이터에만 포함되고 UI에는 표시되지 않는 필드
+   * @description 폼 데이터에만 포함되고 UI에는 표시되지 않는 필드 - 표준 props와 동일하므로 매핑 불필요
    * @props value, onChange, onBlur (표준, 하지만 UI 렌더링 안함)
    * @example 폼 전송 시 필요한 메타데이터나 ID 값 저장용
    */
-  hidden: {
-    value: 'value',
-    onChange: 'onChange',
-    onBlur: 'onBlur'
-  },
+  // hidden: 표준 props와 동일하므로 매핑 생략
   
   /**
    * 사용자 정의 필드
-   * @description 완전히 커스텀한 컴포넌트 (기본 매핑 제공)
+   * @description 완전히 커스텀한 컴포넌트 - 기본적으로 표준 props 사용, 필요시 개별 매핑
    * @props value, onChange, onBlur (기본값, 실제로는 커스텀 매핑 필요)
    * @example 사용자가 직접 withFieldProps로 매핑하거나 render prop 사용
    */
-  custom: {
-    value: 'value',
-    onChange: 'onChange',
-    onBlur: 'onBlur'
-  }
+  // custom: 표준 props 사용, 필요시 개별 매핑
 } as const;
 
 /**

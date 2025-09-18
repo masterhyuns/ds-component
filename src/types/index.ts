@@ -177,8 +177,8 @@ export interface SearchConfig<T = any> {
  * 표준 props 이름 → 실제 컴포넌트 props 이름 매핑
  */
 export interface FieldPropsMapping {
-  /** 값 속성 매핑 (예: value → checked, value → selected) */
-  value: string;
+  /** 값 속성 매핑 (예: value → checked, value → selected) - 표준과 동일하면 생략 가능 */
+  value?: string;
   /** 변경 핸들러 매핑 (예: onChange → onCheckedChange, onChange → onSelect) */
   onChange: string;
   /** 블러 핸들러 매핑 (예: onBlur → onBlur) */

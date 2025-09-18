@@ -96,15 +96,10 @@ export const withFieldProps = <P extends Record<string, any>>(
     // 매핑 설정 조회
     const mapping = getFieldMapping(fieldType);
     
-    // 매핑이 없는 경우 경고 및 fallback 처리
+    // 매핑이 없는 경우 표준 props 그대로 사용 (정상적인 케이스)
     if (!mapping) {
-      // 경고 출력
-      console.warn(
-        `[withFieldProps] No props mapping found for field type: ${fieldType}. ` +
-        `Component will receive original props as-is.`
-      );
-      
-      // 매핑이 없으면 원본 props 그대로 전달 (fallback)
+      // 표준 props와 동일한 필드 타입 (text, select, textarea, hidden, custom 등)
+      // 경고 없이 원본 props 그대로 전달
       return <Component {...(props as any)} />;
     }
     
