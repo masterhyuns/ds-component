@@ -52,36 +52,8 @@ export const mapStandardPropsToComponent = (
 
   const mappedProps: Record<string, any> = {};
   
-  // 핵심 props 매핑 (value, onChange, onBlur)
-  // value 매핑: 매핑이 정의되어 있으면 사용, 없으면 표준 'value' 그대로 사용
-  if (mapping.value) {
-    // 커스텀 매핑된 value prop 사용 (예: checked, selected 등)
-    if (standardProps.value !== undefined) {
-      mappedProps[mapping.value] = standardProps.value;
-    }
-  } else {
-    // 매핑이 없으면 표준 'value' 그대로 사용
-    if (standardProps.value !== undefined) {
-      mappedProps['value'] = standardProps.value;
-    }
-  }
-  
-  if (mapping.onChange && standardProps.onChange) {
-    mappedProps[mapping.onChange] = standardProps.onChange;
-  }
-  
-  if (mapping.onBlur && standardProps.onBlur) {
-    mappedProps[mapping.onBlur] = standardProps.onBlur;
-  }
-  
-  // 추가 매핑 처리 (확장 가능한 props들)
-  // value, onChange, onBlur 외의 다른 매핑들을 동적으로 처리
+  // 모든 매핑을 동적으로 처리 (value, onChange, onBlur 포함)
   Object.entries(mapping).forEach(([standardPropName, componentPropName]) => {
-    // 이미 처리된 핵심 props는 스킵
-    if (['value', 'onChange', 'onBlur'].includes(standardPropName)) {
-      return;
-    }
-    
     // 컴포넌트 prop 이름이 정의되어 있고, 해당 값이 존재하는 경우만 매핑
     if (componentPropName && (standardProps as any)[standardPropName] !== undefined) {
       mappedProps[componentPropName] = (standardProps as any)[standardPropName];
