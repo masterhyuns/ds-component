@@ -40,86 +40,117 @@ export const useTabMemoryManager = (config: MemoryConfig = {
    * 개별 탭의 메모리 사용량 측정
    * Performance Observer와 Memory API 활용
    */
+  // 탭별 메모리 측정 기준점 저장
+  const tabMemoryBaseline = useRef<Map<string, number>>(new Map());
+
   const measureTabMemory = useCallback((tabId: string, iframeElement?: HTMLIFrameElement): number => {
     try {
       if (!iframeElement) {
-        return 2; // 기본값 2MB
+        return 0;
       }
 
-      // iframe 존재 여부와 로딩 상태 확인
-      const isLoaded = iframeElement.contentDocument !== null;
-      
-      // CORS로 인해 contentDocument 접근 불가한 경우
-      let baseMemoryEstimate = 3; // 기본 3MB
-      
-      // iframe의 src URL 기반 추정
-      if (iframeElement.src && iframeElement.src !== 'about:blank') {
-        // URL 길이와 도메인을 기반으로 추정
-        const url = new URL(iframeElement.src);
-        const domain = url.hostname;
+      let measuredMemory = 0;
+
+      // 1. Performance API - Navigation Timing으로 페이지 로드 크기 측정
+      try {
+        const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        const pageLoadEntry = navigationEntries[navigationEntries.length - 1];
         
-        // 도메인별 대략적인 메모리 사용량 추정
-        if (domain.includes('github')) baseMemoryEstimate = 8;
-        else if (domain.includes('google')) baseMemoryEstimate = 12;
-        else if (domain.includes('stackoverflow')) baseMemoryEstimate = 6;
-        else if (domain.includes('wikipedia')) baseMemoryEstimate = 4;
-        else if (domain.includes('jsonplaceholder')) baseMemoryEstimate = 2;
-        else if (domain.includes('httpbin')) baseMemoryEstimate = 1;
-        else baseMemoryEstimate = 5; // 기본값
+        if (pageLoadEntry) {
+          // 전송된 바이트를 메모리로 추정 (HTML + 기본 리소스)
+          const transferSize = pageLoadEntry.transferSize || 0;
+          measuredMemory += (transferSize / 1024 / 1024) * 2; // 2배 팽창 계수
+        }
+      } catch (error) {
+        console.warn('Navigation Timing API 실패:', error);
+      }
+
+      // 2. Resource Timing API - 해당 iframe 관련 리소스들의 실제 크기 측정
+      try {
+        const resourceEntries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+        const iframeSrc = iframeElement.src;
         
-        // 페이지 복잡도 추정 (경로 깊이 기반)
-        const pathDepth = url.pathname.split('/').filter(p => p.length > 0).length;
-        baseMemoryEstimate += pathDepth * 0.5;
-        
-        // 쿼리 파라미터가 있으면 추가
-        if (url.search) {
-          baseMemoryEstimate += 1;
+        // 현재 iframe과 관련된 리소스들 필터링
+        const relatedResources = resourceEntries.filter(entry => {
+          try {
+            const entryUrl = new URL(entry.name);
+            const iframeUrl = new URL(iframeSrc);
+            return entryUrl.hostname === iframeUrl.hostname;
+          } catch {
+            return entry.name.includes(iframeSrc);
+          }
+        });
+
+        // 실제 전송된 데이터 크기 합계
+        const totalTransferredBytes = relatedResources.reduce((sum, entry) => {
+          return sum + (entry.transferSize || entry.encodedBodySize || 0);
+        }, 0);
+
+        // 네트워크 리소스를 메모리 사용량으로 변환
+        // 압축 해제, DOM 생성, 렌더링 등을 고려하여 3배 팽창 계수 적용
+        const resourceMemory = (totalTransferredBytes / 1024 / 1024) * 3;
+        measuredMemory += resourceMemory;
+
+        console.log(`리소스 기반 측정 (${tabId}):`, {
+          관련리소스수: relatedResources.length,
+          전송바이트: Math.round(totalTransferredBytes / 1024) + 'KB',
+          추정메모리: Math.round(resourceMemory * 10) / 10 + 'MB'
+        });
+
+      } catch (error) {
+        console.warn('Resource Timing API 실패:', error);
+      }
+
+      // 3. Chrome Memory API - 전체적인 메모리 사용량 변화 측정
+      if ('memory' in performance) {
+        try {
+          const memory = (performance as any).memory;
+          const currentTotalMemory = memory.usedJSHeapSize / (1024 * 1024);
+          
+          // 기준점이 없으면 현재 값을 기준점으로 설정
+          if (!tabMemoryBaseline.current.has('total')) {
+            tabMemoryBaseline.current.set('total', currentTotalMemory);
+          }
+          
+          // 전체 메모리 변화량을 현재 활성 탭 수로 나누어 분배
+          const baselineMemory = tabMemoryBaseline.current.get('total') || currentTotalMemory;
+          const memoryIncrease = Math.max(0, currentTotalMemory - baselineMemory);
+          const activeTabs = document.querySelectorAll('iframe[data-tab-id]').length;
+          const memoryPerTab = activeTabs > 0 ? memoryIncrease / activeTabs : 0;
+          
+          measuredMemory += memoryPerTab;
+
+          console.log(`Chrome Memory API (${tabId}):`, {
+            전체현재: Math.round(currentTotalMemory) + 'MB',
+            전체기준: Math.round(baselineMemory) + 'MB', 
+            증가량: Math.round(memoryIncrease) + 'MB',
+            탭할당: Math.round(memoryPerTab * 10) / 10 + 'MB'
+          });
+
+        } catch (error) {
+          console.warn('Chrome Memory API 실패:', error);
         }
       }
-      
-      // Performance API로 네트워크 리소스 확인
-      try {
-        const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-        const relatedEntries = entries.filter(entry => 
-          entry.name.includes(iframeElement.src) || 
-          (new URL(entry.name).hostname === new URL(iframeElement.src).hostname)
-        );
-        
-        // 네트워크 리소스 크기 기반 메모리 추가
-        const networkMemory = relatedEntries.reduce((sum, entry) => {
-          // 전송된 데이터 크기를 메모리로 변환 (압축 해제 등 고려하여 1.5배)
-          return sum + ((entry.transferSize || entry.encodedBodySize || 1024) * 1.5);
-        }, 0) / (1024 * 1024); // MB 변환
-        
-        baseMemoryEstimate += networkMemory;
-      } catch (perfError) {
-        // Performance API 실패 시 무시
-        console.warn('Performance API 접근 실패:', perfError);
+
+      // 4. PerformanceObserver를 통한 실시간 메모리 측정 (향후 확장용)
+      // 현재는 기본값으로 최소 메모리 보장
+      if (measuredMemory < 1) {
+        measuredMemory = 2; // 최소 2MB 보장
       }
+
+      // 최종 값 정규화 (1MB ~ 200MB 범위)
+      const finalMemory = Math.max(1, Math.min(200, measuredMemory));
       
-      // Chrome Memory API 활용 (가능한 경우)
-      if ('memory' in performance) {
-        const memory = (performance as any).memory;
-        const totalMemory = memory.usedJSHeapSize / (1024 * 1024);
-        // 전체 메모리의 일정 비율을 해당 iframe으로 추정 (탭 수 고려)
-        const iframes = document.querySelectorAll('iframe[data-tab-id]');
-        const memoryPerTab = totalMemory / Math.max(iframes.length, 1);
-        
-        // 추정값과 실제 측정값 중 더 큰 값 사용
-        baseMemoryEstimate = Math.max(baseMemoryEstimate, memoryPerTab * 0.8);
-      }
-      
-      // 로딩되지 않은 경우 메모리 사용량 감소
-      if (!isLoaded && iframeElement.src !== 'about:blank') {
-        baseMemoryEstimate *= 0.3; // 30%만 사용
-      }
-      
-      // 최소 1MB, 최대 100MB로 제한
-      return Math.max(1, Math.min(baseMemoryEstimate, 100));
+      console.log(`📊 최종 메모리 측정 (${tabId}):`, {
+        URL: iframeElement.src.substring(0, 50) + '...',
+        측정결과: Math.round(finalMemory * 10) / 10 + 'MB'
+      });
+
+      return Math.round(finalMemory * 10) / 10; // 소수점 1자리
       
     } catch (error) {
       console.warn(`메모리 측정 실패 (탭: ${tabId}):`, error);
-      return 3; // 기본값 3MB
+      return 2.0; // fallback
     }
   }, []);
 
