@@ -48,7 +48,7 @@ export const OptimizedIframe: React.FC<OptimizedIframeProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(!lazyLoad);
+  const [isInView, setIsInView] = useState(!lazyLoad || isActive);
   const [loadStartTime, setLoadStartTime] = useState<number | null>(null);
   const [lastMemoryCheck, setLastMemoryCheck] = useState(Date.now());
   
@@ -259,6 +259,15 @@ export const OptimizedIframe: React.FC<OptimizedIframeProps> = ({
   }, [tabId, src, isLoaded]);
 
   /**
+   * 활성 상태 변경 시 로딩 처리
+   */
+  useEffect(() => {
+    if (isActive && !isInView) {
+      setIsInView(true);
+    }
+  }, [isActive, isInView]);
+
+  /**
    * 활성 상태 변경 시 최적화
    */
   useEffect(() => {
@@ -341,7 +350,7 @@ export const OptimizedIframe: React.FC<OptimizedIframeProps> = ({
           data-tab-id={tabId}
           onLoad={handleLoad}
           onError={handleError}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-top-navigation"
           loading="lazy"
           allow="camera; microphone; geolocation; encrypted-media"
         />

@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useTabMemoryManager } from '../../hooks/useTabMemoryManager';
 import { OptimizedIframe } from '../OptimizedIframe/OptimizedIframe';
 import { TabLimitWarning } from '../TabLimitWarning/TabLimitWarning';
 import { MemoryDashboard } from '../MemoryDashboard/MemoryDashboard';
+import { detectSystemMemory, formatMemoryInfo, SystemMemoryInfo } from '../../utils/memoryDetector';
 import styles from './TabManager.module.scss';
 
 export interface TabInfo {
@@ -67,6 +68,8 @@ export const TabManager: React.FC<TabManagerProps> = ({
   );
   const [showWarning, setShowWarning] = useState(false);
   const [newTabUrl, setNewTabUrl] = useState('');
+  const [systemMemoryInfo, setSystemMemoryInfo] = useState<SystemMemoryInfo | null>(null);
+  const [dynamicMemoryConfig, setDynamicMemoryConfig] = useState(memoryConfig);
 
   // 메모리 관리자 훅
   const {
@@ -79,7 +82,46 @@ export const TabManager: React.FC<TabManagerProps> = ({
     performMemoryCleanup,
     updateAllTabsMemory,
     stats
-  } = useTabMemoryManager(memoryConfig);
+  } = useTabMemoryManager(dynamicMemoryConfig);
+
+  /**
+   * 시스템 메모리 감지 및 동적 설정 적용
+   */
+  useEffect(() => {
+    const initializeMemorySettings = async () => {
+      try {
+        console.log('🔍 시스템 메모리 분석 중...');
+        const memoryInfo = await detectSystemMemory();
+        setSystemMemoryInfo(memoryInfo);
+        
+        // 감지된 정보로 메모리 설정 업데이트
+        const optimizedConfig = {
+          ...memoryConfig,
+          maxTabs: memoryInfo.recommendedMaxTabs,
+          memoryThreshold: memoryInfo.recommendedThreshold,
+          warningThreshold: memoryInfo.recommendedWarningThreshold,
+        };
+        
+        setDynamicMemoryConfig(optimizedConfig);
+        
+        console.log('📊 동적 메모리 설정 적용:');
+        console.log(formatMemoryInfo(memoryInfo));
+        console.log('최종 적용 설정:', optimizedConfig);
+        
+        // 사용자에게 알림 (선택적)
+        if (showDashboard) {
+          setTimeout(() => {
+            alert(`🎯 시스템 분석 완료!\n\n${formatMemoryInfo(memoryInfo)}`);
+          }, 1000);
+        }
+        
+      } catch (error) {
+        console.warn('시스템 메모리 감지 실패, 기본 설정 사용:', error);
+      }
+    };
+
+    initializeMemorySettings();
+  }, [memoryConfig, showDashboard]);
 
   /**
    * 새 탭 생성
@@ -104,7 +146,37 @@ export const TabManager: React.FC<TabManagerProps> = ({
     setTabs(prev => new Map(prev).set(newTab.id, newTab));
     onTabCreate?.(newTab);
     setNewTabUrl('');
-  }, [canAddNewTab, onTabCreate]);
+    
+    // 새 탭을 즉시 활성화
+    setTimeout(() => {
+      // 이전 활성 탭 비활성화
+      if (activeTabId) {
+        setTabActive(activeTabId, false);
+        setTabs(prev => {
+          const updated = new Map(prev);
+          const tab = updated.get(activeTabId);
+          if (tab) {
+            updated.set(activeTabId, { ...tab, isActive: false });
+          }
+          return updated;
+        });
+      }
+
+      // 새 탭 활성화
+      setActiveTabId(newTab.id);
+      setTabActive(newTab.id, true);
+      setTabs(prev => {
+        const updated = new Map(prev);
+        const tab = updated.get(newTab.id);
+        if (tab) {
+          updated.set(newTab.id, { ...tab, isActive: true });
+        }
+        return updated;
+      });
+
+      updateAllTabsMemory();
+    }, 100);
+  }, [canAddNewTab, onTabCreate, updateAllTabsMemory, activeTabId, setTabActive]);
 
   /**
    * 탭 활성화
@@ -266,10 +338,15 @@ export const TabManager: React.FC<TabManagerProps> = ({
         <div className={styles.memoryStatus}>
           <div className={`${styles.memoryIndicator} ${isMemoryWarning ? styles.warning : styles.normal}`}>
             <span className={styles.memoryText}>
-              {Math.round(totalMemoryUsage)}MB / {memoryConfig.memoryThreshold}MB
+              {Math.round(totalMemoryUsage)}MB / {dynamicMemoryConfig.memoryThreshold}MB
+              {systemMemoryInfo && (
+                <small style={{ opacity: 0.7, fontSize: '10px', marginLeft: '4px' }}>
+                  ({systemMemoryInfo.deviceType})
+                </small>
+              )}
             </span>
             <span className={styles.tabCount}>
-              {stats.totalTabsCount} / {memoryConfig.maxTabs} 탭
+              {tabList.length} / {dynamicMemoryConfig.maxTabs} 탭
             </span>
           </div>
           
@@ -305,7 +382,7 @@ export const TabManager: React.FC<TabManagerProps> = ({
                 src={tab.url}
                 title={tab.title}
                 isActive={tab.isActive}
-                lazyLoad={!tab.isActive}
+                lazyLoad={true}
                 onLoad={handleIframeLoad}
                 onMemoryChange={handleMemoryChange}
                 onError={(tabId, error) => {
@@ -324,9 +401,9 @@ export const TabManager: React.FC<TabManagerProps> = ({
       {/* 경고 모달 */}
       <TabLimitWarning
         currentMemory={totalMemoryUsage}
-        maxMemory={memoryConfig.memoryThreshold}
-        currentTabs={stats.totalTabsCount}
-        maxTabs={memoryConfig.maxTabs}
+        maxMemory={dynamicMemoryConfig.memoryThreshold}
+        currentTabs={tabList.length}
+        maxTabs={dynamicMemoryConfig.maxTabs}
         isVisible={showWarning}
         onAutoCleanup={handleAutoCleanup}
         onManualCleanup={handleManualCleanup}
@@ -340,13 +417,13 @@ export const TabManager: React.FC<TabManagerProps> = ({
             tabs={memoryTabs}
             totalMemoryUsage={totalMemoryUsage}
             isMemoryWarning={isMemoryWarning}
-            memoryConfig={memoryConfig}
+            memoryConfig={dynamicMemoryConfig}
             stats={stats}
             onCleanupTab={handleCloseTab}
             onCleanupAll={handleAutoCleanup}
             onConfigChange={(config) => {
-              // 설정 변경 처리 (실제 구현에서는 props로 받은 콜백 사용)
               console.log('메모리 설정 변경:', config);
+              setDynamicMemoryConfig(prev => ({ ...prev, ...config }));
             }}
           />
         </div>

@@ -6,10 +6,11 @@ import {
   ConditionalFieldsExample,
   ArrayFieldsExample,
 } from './examples';
+import { TabManager } from './components/TabManager/TabManager';
 import './App.css';
 
 function App() {
-  const [activeExample, setActiveExample] = useState<'basic' | 'custom' | 'conditional' | 'array'>('basic');
+  const [activeExample, setActiveExample] = useState<'basic' | 'custom' | 'conditional' | 'array' | 'tabs'>('basic');
   const [submitData, setSubmitData] = useState<any>(null);
 
   const handleSubmit = (data: any) => {
@@ -28,7 +29,7 @@ function App() {
         borderBottom: '2px solid #e5e7eb',
         paddingBottom: '0'
       }}>
-        {(['basic', 'custom', 'conditional', 'array'] as const).map((example) => (
+        {(['basic', 'custom', 'conditional', 'array', 'tabs'] as const).map((example) => (
           <button
             key={example}
             onClick={() => {
@@ -50,6 +51,7 @@ function App() {
             {example === 'custom' && '커스텀 레이아웃'}
             {example === 'conditional' && '조건부 필드'}
             {example === 'array' && '배열 필드'}
+            {example === 'tabs' && '🖥️ 탭 관리자'}
           </button>
         ))}
       </div>
@@ -74,8 +76,43 @@ function App() {
         <ArrayFieldsExample onSubmit={handleSubmit} />
       )}
 
+      {/* 탭 관리자 예제 */}
+      {activeExample === 'tabs' && (
+        <div style={{ height: 'calc(100vh - 200px)', minHeight: '600px' }}>
+          <TabManager
+            initialTabs={[
+              {
+                id: 'tab-1',
+                title: 'JSONPlaceholder',
+                url: 'https://jsonplaceholder.typicode.com',
+                isActive: true,
+                created: new Date()
+              },
+              {
+                id: 'tab-2', 
+                title: 'httpbin',
+                url: 'https://httpbin.org',
+                isActive: false,
+                created: new Date()
+              }
+            ]}
+            memoryConfig={{
+              maxTabs: 10,
+              memoryThreshold: 500,
+              warningThreshold: 300,
+              checkInterval: 5000,
+              autoCleanup: true
+            }}
+            showDashboard={true}
+            onTabCreate={(tab) => console.log('새 탭 생성:', tab)}
+            onTabClose={(tabId) => console.log('탭 닫힘:', tabId)}
+            onTabActivate={(tabId) => console.log('탭 활성화:', tabId)}
+          />
+        </div>
+      )}
+
       {/* 제출 결과 표시 */}
-      {submitData && (
+      {submitData && activeExample !== 'tabs' && (
         <div style={{ 
           marginTop: '2rem', 
           padding: '1.5rem', 
