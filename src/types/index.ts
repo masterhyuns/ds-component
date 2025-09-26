@@ -582,3 +582,307 @@ export interface GridThemeConfig {
   /** 최대 컨테이너 너비 */
   maxContainerWidth?: string;
 }
+
+// ========================================
+// 탭 메모리 관리 시스템 타입 정의
+// ========================================
+
+/**
+ * 탭별 메모리 정보
+ * 메모리 사용량 모니터링과 성능 추적을 위한 탭 정보
+ */
+export interface TabMemoryInfo {
+  /** 탭 고유 ID */
+  id: string;
+  /** 탭에서 로드한 URL */
+  url: string;
+  /** 메모리 사용량 (MB 단위) */
+  memoryUsage: number;
+  /** 마지막 접근 시간 */
+  lastAccessed: Date;
+  /** 현재 활성 상태 여부 */
+  isActive: boolean;
+  /** 성능 점수 (0-100점, 메모리 사용량과 로딩 시간 기반) */
+  performanceScore: number;
+}
+
+/**
+ * 메모리 관리 설정
+ * 탭 메모리 사용량 제한 및 최적화 설정
+ */
+export interface MemoryConfig {
+  /** 최대 허용 탭 개수 */
+  maxTabs: number;
+  /** 메모리 사용량 임계값 (MB) - 이 값을 초과하면 새 탭 생성 제한 */
+  memoryThreshold: number;
+  /** 경고 임계값 (MB) - 이 값을 초과하면 경고 표시 */
+  warningThreshold: number;
+  /** 메모리 체크 간격 (밀리초) */
+  checkInterval: number;
+  /** 자동 정리 활성화 여부 */
+  autoCleanup: boolean;
+}
+
+/**
+ * 탭 정보
+ * UI에서 표시되는 탭의 기본 정보
+ */
+export interface TabInfo {
+  /** 탭 고유 ID */
+  id: string;
+  /** 탭 제목 */
+  title: string;
+  /** 탭 URL */
+  url: string;
+  /** 활성 상태 여부 */
+  isActive: boolean;
+  /** 탭 생성 시간 */
+  created: Date;
+  /** 파비콘 URL (선택사항) */
+  favicon?: string;
+  /** 로딩 상태 */
+  loadingState?: TabLoadingState;
+}
+
+/**
+ * 탭 로딩 상태
+ * 탭 내 iframe의 현재 로딩 상태
+ */
+export enum TabLoadingState {
+  /** 초기 상태 */
+  IDLE = 'idle',
+  /** 로딩 중 */
+  LOADING = 'loading',
+  /** 로딩 완료 */
+  LOADED = 'loaded',
+  /** 로딩 실패 */
+  ERROR = 'error'
+}
+
+/**
+ * 메모리 통계 정보
+ * 전체 탭 시스템의 메모리 사용 현황 통계
+ */
+export interface MemoryStats {
+  /** 활성 탭 개수 */
+  activeTabsCount: number;
+  /** 전체 탭 개수 */
+  totalTabsCount: number;
+  /** 탭당 평균 메모리 사용량 (MB) */
+  averageMemoryPerTab: number;
+  /** 최저 성능 점수 */
+  lowestPerformanceScore: number;
+  /** 최고 성능 점수 */
+  highestPerformanceScore: number;
+  /** 총 메모리 사용량 (MB) */
+  totalMemoryUsage: number;
+}
+
+/**
+ * 탭 정리 결과
+ * 자동/수동 탭 정리 작업의 실행 결과
+ */
+export interface CleanupResult {
+  /** 정리된 탭 ID 목록 */
+  cleanedTabIds: string[];
+  /** 절약된 메모리 양 (MB) */
+  memorySaved: number;
+  /** 정리 성공 여부 */
+  success: boolean;
+  /** 오류 메시지 (실패 시) */
+  error?: string;
+}
+
+/**
+ * 새 탭 생성 가능 여부 결과
+ * 메모리 및 탭 개수 제한 검사 결과
+ */
+export interface CanAddTabResult {
+  /** 생성 가능 여부 */
+  allowed: boolean;
+  /** 생성 불가 시 이유 */
+  reason?: string;
+  /** 권장 조치사항 */
+  suggestion?: string;
+}
+
+/**
+ * iframe 성능 메트릭
+ * 개별 iframe의 상세한 성능 및 리소스 사용량 정보
+ */
+export interface IframePerformanceMetrics {
+  /** 탭 ID */
+  tabId: string;
+  /** 로딩 시작 시간 (timestamp) */
+  loadStartTime: number;
+  /** 로딩 완료 시간 (timestamp) */
+  loadEndTime: number;
+  /** 총 로딩 시간 (밀리초) */
+  loadDuration: number;
+  /** DOM 노드 수 */
+  domNodeCount: number;
+  /** 이미지 개수 */
+  imageCount: number;
+  /** 스크립트 개수 */
+  scriptCount: number;
+  /** 추정 메모리 사용량 (MB) */
+  estimatedMemoryUsage: number;
+  /** 리소스 로딩 시간들 */
+  resourceLoadTimes: ResourceLoadTime[];
+}
+
+/**
+ * 리소스 로딩 시간 정보
+ * 개별 리소스 (이미지, CSS, JS 등)의 로딩 성능 데이터
+ */
+export interface ResourceLoadTime {
+  /** 리소스 URL */
+  url: string;
+  /** 리소스 타입 (image, script, stylesheet 등) */
+  type: string;
+  /** 로딩 시간 (밀리초) */
+  duration: number;
+  /** 리소스 크기 (bytes) */
+  size: number;
+}
+
+/**
+ * 탭 이벤트 타입
+ * 탭 생명주기 및 메모리 관련 이벤트 종류
+ */
+export enum TabEventType {
+  /** 탭 생성 */
+  CREATE = 'create',
+  /** 탭 활성화 */
+  ACTIVATE = 'activate',
+  /** 탭 비활성화 */
+  DEACTIVATE = 'deactivate',
+  /** 탭 닫기 */
+  CLOSE = 'close',
+  /** 메모리 경고 */
+  MEMORY_WARNING = 'memory_warning',
+  /** 자동 정리 실행 */
+  AUTO_CLEANUP = 'auto_cleanup'
+}
+
+/**
+ * 탭 이벤트 데이터
+ * 탭 관련 이벤트의 상세 정보
+ */
+export interface TabEvent {
+  /** 이벤트 타입 */
+  type: TabEventType;
+  /** 탭 ID */
+  tabId: string;
+  /** 이벤트 발생 시간 */
+  timestamp: Date;
+  /** 추가 데이터 */
+  data?: {
+    /** 메모리 사용량 (MB) */
+    memoryUsage?: number;
+    /** 성능 점수 */
+    performanceScore?: number;
+    /** 오류 메시지 */
+    error?: string;
+    /** 정리된 탭 목록 (자동 정리 시) */
+    cleanedTabs?: string[];
+  };
+}
+
+/**
+ * 메모리 최적화 권장사항
+ * 시스템이 사용자에게 제안하는 메모리 절약 방안
+ */
+export interface OptimizationSuggestion {
+  /** 권장사항 ID */
+  id: string;
+  /** 권장사항 타입 */
+  type: 'cleanup_tabs' | 'reduce_memory' | 'optimize_performance';
+  /** 제목 */
+  title: string;
+  /** 설명 */
+  description: string;
+  /** 우선순위 (1-5, 5가 가장 높음) */
+  priority: number;
+  /** 예상 효과 */
+  expectedImpact: {
+    /** 절약 가능한 메모리 (MB) */
+    memorySaving: number;
+    /** 성능 개선 정도 (1-5) */
+    performanceImprovement: number;
+  };
+  /** 대상 탭 ID 목록 */
+  targetTabIds: string[];
+  /** 실행 가능한 액션 */
+  action?: () => Promise<CleanupResult>;
+}
+
+/**
+ * 대시보드 설정
+ * 메모리 모니터링 대시보드의 표시 및 동작 설정
+ */
+export interface DashboardConfig {
+  /** 대시보드 표시 여부 */
+  enabled: boolean;
+  /** 자동 새로고침 간격 (밀리초) */
+  refreshInterval: number;
+  /** 차트에 표시할 최대 탭 수 */
+  maxDisplayTabs: number;
+  /** 성능 기록 보관 기간 (밀리초) */
+  historyRetentionPeriod: number;
+}
+
+/**
+ * 브라우저 호환성 정보
+ * 메모리 모니터링에 필요한 브라우저 API 지원 여부
+ */
+export interface BrowserCompatibility {
+  /** Performance Observer 지원 여부 */
+  supportsPerformanceObserver: boolean;
+  /** Memory API 지원 여부 */
+  supportsMemoryAPI: boolean;
+  /** Intersection Observer 지원 여부 */
+  supportsIntersectionObserver: boolean;
+  /** Web Workers 지원 여부 */
+  supportsWebWorkers: boolean;
+}
+
+/**
+ * 에러 타입
+ * 탭 메모리 관리 시스템에서 발생할 수 있는 오류 종류
+ */
+export enum ErrorType {
+  /** 메모리 부족 */
+  OUT_OF_MEMORY = 'out_of_memory',
+  /** 탭 개수 초과 */
+  TOO_MANY_TABS = 'too_many_tabs',
+  /** iframe 로딩 실패 */
+  IFRAME_LOAD_ERROR = 'iframe_load_error',
+  /** 네트워크 오류 */
+  NETWORK_ERROR = 'network_error',
+  /** 브라우저 호환성 오류 */
+  COMPATIBILITY_ERROR = 'compatibility_error'
+}
+
+/**
+ * 시스템 에러
+ * 탭 메모리 관리 시스템의 상세한 오류 정보
+ */
+export interface SystemError {
+  /** 에러 타입 */
+  type: ErrorType;
+  /** 에러 메시지 */
+  message: string;
+  /** 에러 코드 */
+  code: string;
+  /** 발생 시간 */
+  timestamp: Date;
+  /** 관련 탭 ID */
+  tabId?: string;
+  /** 추가 컨텍스트 정보 */
+  context?: Record<string, any>;
+  /** 복구 가능 여부 */
+  recoverable: boolean;
+  /** 권장 조치사항 */
+  suggestedAction?: string;
+}

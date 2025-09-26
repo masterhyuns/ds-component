@@ -65,7 +65,7 @@ export const Default: Story = {
       placeholder: '옵션을 선택하세요',
       options: basicOptions,
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
     onBlur: () => console.log('포커스 해제'),
   },
 };
@@ -81,7 +81,7 @@ export const WithValue: Story = {
       label: '선택된 상태',
       options: basicOptions,
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
   },
 };
 
@@ -100,7 +100,7 @@ export const Required: Story = {
         required: true,
       },
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
   },
 };
 
@@ -119,7 +119,7 @@ export const WithError: Story = {
         required: true,
       },
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
   },
 };
 
@@ -135,7 +135,7 @@ export const Disabled: Story = {
       label: '비활성화된 선택',
       options: categoryOptions,
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
   },
 };
 
@@ -151,7 +151,7 @@ export const WithDisabledOptions: Story = {
       placeholder: '우선순위를 선택하세요',
       options: priorityOptions,
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
   },
 };
 
@@ -183,7 +183,7 @@ export const ManyOptions: Story = {
         { label: '멕시코', value: 'MX' },
       ],
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
   },
 };
 
@@ -205,7 +205,7 @@ export const NumericValues: Story = {
         { label: '⭐⭐⭐⭐⭐ 5점', value: 5 },
       ],
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
   },
 };
 
@@ -234,7 +234,7 @@ export const ObjectValues: Story = {
         },
       ],
     },
-    onChange: (value) => {
+    onChange: (value: any) => {
       try {
         const userData = JSON.parse(value);
         console.log('선택된 사용자:', userData);
@@ -265,7 +265,7 @@ export const Playground: Story = {
         required: false,
       },
     },
-    onChange: (value) => console.log('선택됨:', value),
+    onChange: (value: any) => console.log('선택됨:', value),
     onBlur: () => console.log('포커스 해제'),
   },
 };

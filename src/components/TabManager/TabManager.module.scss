@@ -1,0 +1,498 @@
+/**
+ * TabManager 컴포넌트 스타일
+ * 메모리 최적화된 탭 관리자 UI
+ */
+
+.tabManager {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-background-primary, #ffffff);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.tabHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background-color: var(--color-background-secondary, #f9fafb);
+  border-bottom: 1px solid var(--color-border-light, #e5e7eb);
+  flex-shrink: 0;
+  overflow-x: auto;
+  min-height: 60px;
+}
+
+.tabList {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  min-width: 0;
+
+  /* 스크롤바 스타일링 */
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--color-border, #d1d5db);
+    border-radius: 2px;
+  }
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--color-background-tertiary, #e5e7eb);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px 6px 0 0;
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 120px;
+  max-width: 200px;
+  position: relative;
+
+  &:hover {
+    background-color: var(--color-background-primary, #ffffff);
+    color: var(--color-text-primary, #1f2937);
+  }
+
+  &.active {
+    background-color: var(--color-background-primary, #ffffff);
+    color: var(--color-text-primary, #1f2937);
+    border-bottom-color: var(--color-background-primary, #ffffff);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+  }
+}
+
+.tabTitle {
+  flex: 1;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.tabCloseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: none;
+  color: var(--color-text-tertiary, #9ca3af);
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: var(--color-danger-light, #fecaca);
+    color: var(--color-danger, #ef4444);
+  }
+}
+
+.newTabSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.urlInput {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 14px;
+  width: 250px;
+  background-color: var(--color-background-primary, #ffffff);
+  color: var(--color-text-primary, #1f2937);
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &::placeholder {
+    color: var(--color-text-tertiary, #9ca3af);
+  }
+}
+
+.addTabButton {
+  padding: 8px 16px;
+  background-color: var(--color-primary, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary-dark, #2563eb);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.memoryStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.memoryIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+
+  &.normal {
+    background-color: var(--color-success-background, #d1fae5);
+    color: var(--color-success-text, #065f46);
+    border-color: var(--color-success-light, #34d399);
+  }
+
+  &.warning {
+    background-color: var(--color-warning-background, #fef3c7);
+    color: var(--color-warning-text, #92400e);
+    border-color: var(--color-warning, #f59e0b);
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+.memoryText {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.tabCount {
+  opacity: 0.8;
+}
+
+.dashboardButton {
+  padding: 6px 12px;
+  background-color: var(--color-background-primary, #ffffff);
+  color: var(--color-text-secondary, #6b7280);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: var(--color-background-secondary, #f3f4f6);
+    color: var(--color-text-primary, #1f2937);
+  }
+}
+
+.tabContent {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-background-primary, #ffffff);
+}
+
+.tabPane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.emptyStateIcon {
+  font-size: 64px;
+  opacity: 0.6;
+}
+
+.emptyStateTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary, #1f2937);
+}
+
+.emptyStateDescription {
+  font-size: 14px;
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.dashboardSection {
+  padding: 20px;
+  background-color: var(--color-background-secondary, #f9fafb);
+  border-top: 1px solid var(--color-border-light, #e5e7eb);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* 애니메이션 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* 반응형 대응 */
+@media (max-width: 1024px) {
+  .tabHeader {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+    min-height: auto;
+  }
+
+  .tabList {
+    order: 1;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .newTabSection {
+    order: 2;
+    flex: 1;
+  }
+
+  .urlInput {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .memoryStatus {
+    order: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .tabButton {
+    min-width: 100px;
+    max-width: 150px;
+    padding: 6px 10px;
+  }
+
+  .tabTitle {
+    font-size: 13px;
+  }
+
+  .tabCloseButton {
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+  }
+
+  .urlInput {
+    width: 200px;
+    font-size: 13px;
+  }
+
+  .addTabButton {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .memoryIndicator {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .dashboardSection {
+    padding: 16px;
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabHeader {
+    padding: 8px;
+  }
+
+  .tabButton {
+    min-width: 80px;
+    max-width: 120px;
+    padding: 4px 8px;
+  }
+
+  .newTabSection {
+    flex-direction: column;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .urlInput {
+    width: 100%;
+  }
+
+  .addTabButton {
+    width: 100%;
+  }
+
+  .memoryStatus {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .emptyStateIcon {
+    font-size: 48px;
+  }
+
+  .emptyStateTitle {
+    font-size: 18px;
+  }
+}
+
+/* 접근성 향상 */
+@media (prefers-reduced-motion: reduce) {
+  .tabButton,
+  .addTabButton,
+  .dashboardButton,
+  .tabPane {
+    transition: none;
+  }
+
+  .memoryIndicator.warning {
+    animation: none;
+  }
+
+  .addTabButton:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* 고대비 모드 */
+@media (prefers-contrast: high) {
+  .tabButton {
+    border-width: 2px;
+
+    &.active {
+      box-shadow: 0 0 0 2px var(--color-primary, #3b82f6);
+    }
+  }
+
+  .urlInput:focus {
+    box-shadow: 0 0 0 2px var(--color-primary, #3b82f6);
+  }
+}
+
+/* 다크 모드 */
+@media (prefers-color-scheme: dark) {
+  .tabManager {
+    background-color: var(--color-background-primary, #1f2937);
+  }
+
+  .tabHeader {
+    background-color: var(--color-background-secondary, #374151);
+    border-bottom-color: var(--color-border-dark, #4b5563);
+  }
+
+  .tabButton {
+    background-color: var(--color-background-tertiary, #4b5563);
+    border-color: var(--color-border-dark, #6b7280);
+    color: var(--color-text-secondary, #d1d5db);
+
+    &:hover {
+      background-color: var(--color-background-primary, #1f2937);
+      color: var(--color-text-primary, #f9fafb);
+    }
+
+    &.active {
+      background-color: var(--color-background-primary, #1f2937);
+      color: var(--color-text-primary, #f9fafb);
+      border-bottom-color: var(--color-background-primary, #1f2937);
+    }
+  }
+
+  .urlInput {
+    background-color: var(--color-background-primary, #1f2937);
+    border-color: var(--color-border-dark, #4b5563);
+    color: var(--color-text-primary, #f9fafb);
+  }
+
+  .dashboardSection {
+    background-color: var(--color-background-secondary, #374151);
+    border-top-color: var(--color-border-dark, #4b5563);
+  }
+}
+
+/* 스크롤 최적화 */
+.tabList,
+.dashboardSection {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border, #d1d5db) transparent;
+}
+
+/* 드래그 방지 */
+.tabButton,
+.addTabButton,
+.dashboardButton {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 터치 장치 최적화 */
+@media (pointer: coarse) {
+  .tabButton,
+  .tabCloseButton,
+  .addTabButton,
+  .dashboardButton {
+    min-height: 44px;
+  }
+
+  .tabCloseButton {
+    min-width: 44px;
+  }
+}

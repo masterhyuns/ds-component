@@ -76,7 +76,7 @@ export const Empty: Story = {
       label: '브랜드 선택',
       options: brandOptions,
     },
-    onChange: (values) => console.log('선택된 값들:', values),
+    onChange: (values: any) => console.log('선택된 값들:', values),
     onBlur: () => console.log('포커스 해제'),
   },
 };
@@ -92,7 +92,7 @@ export const SingleSelection: Story = {
       label: '브랜드 선택',
       options: brandOptions,
     },
-    onChange: (values) => console.log('선택된 값들:', values),
+    onChange: (values: any) => console.log('선택된 값들:', values),
   },
 };
 
@@ -107,7 +107,7 @@ export const MultipleSelection: Story = {
       label: '기술 스택',
       options: techOptions,
     },
-    onChange: (values) => console.log('선택된 기술들:', values),
+    onChange: (values: any) => console.log('선택된 기술들:', values),
   },
 };
 
@@ -122,7 +122,7 @@ export const AllSelected: Story = {
       label: '모든 브랜드 선택됨',
       options: brandOptions,
     },
-    onChange: (values) => console.log('선택된 값들:', values),
+    onChange: (values: any) => console.log('선택된 값들:', values),
   },
 };
 
@@ -141,7 +141,7 @@ export const Required: Story = {
         required: true,
       },
     },
-    onChange: (values) => console.log('선택된 기술들:', values),
+    onChange: (values: any) => console.log('선택된 기술들:', values),
   },
 };
 
@@ -157,7 +157,7 @@ export const WithValidationError: Story = {
       label: '기술 스택 (최소 3개)',
       options: techOptions,
     },
-    onChange: (values) => console.log('선택된 기술들:', values),
+    onChange: (values: any) => console.log('선택된 기술들:', values),
   },
 };
 
@@ -173,7 +173,7 @@ export const Disabled: Story = {
       label: '비활성화된 지역 선택',
       options: regionOptions,
     },
-    onChange: (values) => console.log('선택된 지역들:', values),
+    onChange: (values: any) => console.log('선택된 지역들:', values),
   },
 };
 
@@ -188,7 +188,7 @@ export const WithDisabledOptions: Story = {
       label: '지역 선택 (일부 제한)',
       options: regionOptions,
     },
-    onChange: (values) => console.log('선택된 지역들:', values),
+    onChange: (values: any) => console.log('선택된 지역들:', values),
   },
 };
 
@@ -224,7 +224,7 @@ export const LargeOptionList: Story = {
         { label: '핀란드', value: 'FI' },
       ],
     },
-    onChange: (values) => console.log('선택된 국가들:', values),
+    onChange: (values: any) => console.log('선택된 국가들:', values),
   },
 };
 
@@ -245,7 +245,7 @@ export const NumericValues: Story = {
         { label: '⭐⭐⭐⭐⭐ 5점', value: 5 },
       ],
     },
-    onChange: (values) => console.log('선택된 평점들:', values),
+    onChange: (values: any) => console.log('선택된 평점들:', values),
   },
 };
 
@@ -280,8 +280,8 @@ export const ObjectValues: Story = {
         },
       ],
     },
-    onChange: (values) => {
-      console.log('선택된 담당자들:', values.map(v => {
+    onChange: (values: any) => {
+      console.log('선택된 담당자들:', values.map((v: any) => {
         try {
           return JSON.parse(v);
         } catch {
@@ -310,7 +310,7 @@ export const Playground: Story = {
         { label: '다섯 번째 선택지', value: 'option5' },
       ],
     },
-    onChange: (values) => {
+    onChange: (values: any) => {
       console.log('선택된 값들:', values);
       console.log('선택된 개수:', values.length);
     },
@@ -337,7 +337,7 @@ export const FilterScenario: Story = {
         { label: '평점 높은 상품', value: 'high_rating' },
       ],
     },
-    onChange: (values) => {
+    onChange: (values: any) => {
       console.log('적용된 필터들:', values);
       // 실제 사용에서는 여기서 상품 목록을 필터링
     },

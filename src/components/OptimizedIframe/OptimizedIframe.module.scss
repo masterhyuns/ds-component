@@ -1,0 +1,298 @@
+/**
+ * OptimizedIframe 컴포넌트 스타일
+ * 메모리 최적화된 iframe 컨테이너 UI
+ */
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background-primary, #ffffff);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &.active {
+    box-shadow: 0 0 0 2px var(--color-primary, #3b82f6);
+  }
+}
+
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--color-background-primary, #ffffff);
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-background-primary, #ffffff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-border-light, #e5e7eb);
+  border-top: 3px solid var(--color-primary, #3b82f6);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+.placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    var(--color-background-secondary, #f3f4f6) 0%,
+    var(--color-background-tertiary, #e5e7eb) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 2px dashed var(--color-border, #d1d5db);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, 
+      var(--color-background-tertiary, #e5e7eb) 0%,
+      var(--color-background-secondary, #f3f4f6) 100%);
+    border-color: var(--color-primary, #3b82f6);
+  }
+}
+
+.placeholderIcon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.placeholderText {
+  font-size: 14px;
+  color: var(--color-text-secondary, #6b7280);
+  text-align: center;
+  font-weight: 500;
+}
+
+.debugInfo {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 11px;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  .container:hover & {
+    opacity: 1;
+  }
+}
+
+/* 애니메이션 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 상태별 스타일 */
+.container {
+  /* 비활성 상태 */
+  &:not(.active) {
+    .iframe {
+      filter: grayscale(20%) brightness(90%);
+      pointer-events: none;
+    }
+  }
+
+  /* 호버 상태 */
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 로딩 상태 애니메이션 */
+.loadingOverlay {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      var(--color-primary, #3b82f6), 
+      transparent
+    );
+    animation: loading-progress 2s ease-in-out infinite;
+  }
+}
+
+@keyframes loading-progress {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 0%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 성능 최적화 */
+.iframe {
+  /* GPU 가속 활성화 */
+  transform: translateZ(0);
+  will-change: transform;
+  
+  /* 스크롤 최적화 */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 메모리 부족 상태 스타일 */
+.container[data-memory-warning="true"] {
+  border: 2px solid var(--color-warning, #f59e0b);
+  
+  &::after {
+    content: '⚠️';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 16px;
+    z-index: 15;
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* 오류 상태 스타일 */
+.container[data-error="true"] {
+  .iframe {
+    display: none;
+  }
+  
+  &::before {
+    content: '페이지를 불러올 수 없습니다';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--color-danger, #ef4444);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10;
+  }
+  
+  background: var(--color-danger-background, #fef2f2);
+  border: 2px solid var(--color-danger, #ef4444);
+}
+
+/* 반응형 대응 */
+@media (max-width: 768px) {
+  .placeholderIcon {
+    font-size: 36px;
+  }
+  
+  .placeholderText {
+    font-size: 12px;
+    padding: 0 16px;
+  }
+  
+  .loadingText {
+    font-size: 12px;
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+  }
+}
+
+/* 접근성 향상 */
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .container,
+  .loadingOverlay::before {
+    animation: none;
+  }
+  
+  .container:hover {
+    transform: none;
+  }
+}
+
+/* 고대비 모드 */
+@media (prefers-contrast: high) {
+  .placeholder {
+    border-width: 3px;
+    border-style: solid;
+  }
+  
+  .container.active {
+    box-shadow: 0 0 0 3px var(--color-primary, #3b82f6);
+  }
+}
+
+/* 다크 모드 */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background-color: var(--color-background-primary, #1f2937);
+  }
+  
+  .iframe {
+    background-color: var(--color-background-primary, #1f2937);
+  }
+  
+  .loadingOverlay {
+    background-color: var(--color-background-primary, #1f2937);
+  }
+  
+  .placeholder {
+    background: linear-gradient(135deg, 
+      var(--color-background-secondary, #374151) 0%,
+      var(--color-background-tertiary, #4b5563) 100%);
+  }
+}

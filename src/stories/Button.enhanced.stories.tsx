@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
-import { Button, ButtonProps } from './Button';
+import { Button } from './Button';
 
 /**
  * ## Button 컴포넌트
