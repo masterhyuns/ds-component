@@ -39,6 +39,14 @@ SearchProvider는 react-hook-form을 완전히 캡슐화한 헤드리스 검색 
 
 **onChange** (Function)
 - 값 변경 시 호출되는 핸들러
+- 시그니처: `(name: string, value: any, values: FieldValues) => void`
+
+**onDepends** (Record<string, FieldDependencyHandler>)
+- 필드 간 의존성 규칙 정의
+- 필드 값 변경 시 다른 필드의 상태를 동적으로 제어
+
+**initialValues** (FieldValues)
+- 폼 초기값
 
 **autoSubmit** (boolean)
 - 자동 제출 활성화 (기본값: false)
@@ -242,6 +250,149 @@ const config = {
   // ...
 };
 ```
+
+### 필드 간 의존성 관리 (onDepends) ✨
+
+필드 간 의존성을 선언적으로 관리하여 비즈니스 로직을 config와 분리할 수 있습니다.
+
+#### 기본 구조
+
+```typescript
+interface FieldDependencyHandler {
+  dependencies: string[];                     // 의존하는 필드 이름 배열
+  handler: (values, controller) => void;      // 의존성 변경 시 실행되는 함수
+}
+```
+
+#### FieldController API
+
+handler 함수에서 사용할 수 있는 필드 제어 API:
+
+```typescript
+controller.setValue(fieldName, value)              // 필드 값 설정
+controller.setFieldDisabled(fieldName, disabled)   // 비활성화 상태
+controller.setFieldReadonly(fieldName, readonly)   // 읽기 전용
+controller.setFieldOptions(fieldName, options)     // 옵션 목록 (select 등)
+controller.setFieldPlaceholder(fieldName, text)    // placeholder
+controller.setFieldLabel(fieldName, text)          // label
+controller.updateFieldMeta(fieldName, meta)        // 메타 정보 일괄 업데이트
+controller.getValue(fieldName)                     // 필드 값 가져오기
+controller.getValues()                             // 전체 값 가져오기
+```
+
+#### 예제 1: 국가/도시 선택
+
+```jsx
+import type { FieldDependencyHandler, FieldValues, FieldController } from 'sd-search-box';
+
+// Config는 순수하게 유지
+const config = {
+  id: 'location',
+  fields: [
+    {
+      name: 'country',
+      type: 'select',
+      options: [
+        { label: '한국', value: 'korea' },
+        { label: '미국', value: 'usa' },
+      ]
+    },
+    {
+      name: 'city',
+      type: 'select',
+      disabled: true,
+      options: []
+    }
+  ]
+};
+
+// 비즈니스 로직은 onDepends로 분리
+const dependencies: Record<string, FieldDependencyHandler> = {
+  city: {
+    dependencies: ['country'],
+    handler: (values: FieldValues, controller: FieldController) => {
+      if (!values.country) {
+        controller.setFieldDisabled('city', true);
+        controller.setFieldOptions('city', []);
+      } else {
+        controller.setFieldDisabled('city', false);
+        controller.setFieldOptions('city', getCitiesByCountry(values.country));
+      }
+    }
+  }
+};
+
+function SearchForm() {
+  return (
+    <SearchProvider config={config} onDepends={dependencies}>
+      <Field name="country" />
+      <Field name="city" />
+    </SearchProvider>
+  );
+}
+```
+
+#### 예제 2: 복합 의존성
+
+여러 필드에 의존하는 경우:
+
+```jsx
+const dependencies = {
+  discount: {
+    dependencies: ['customerGrade', 'totalAmount'],
+    handler: (values: FieldValues, controller: FieldController) => {
+      const { customerGrade, totalAmount } = values;
+
+      if (customerGrade === 'vip' && totalAmount >= 100000) {
+        controller.setFieldDisabled('discount', false);
+        controller.setFieldPlaceholder('discount', '최대 30% 할인');
+        controller.updateFieldMeta('discount', {
+          validation: {
+            max: { value: 30, message: '30% 초과 불가' }
+          }
+        });
+      } else {
+        controller.setFieldDisabled('discount', true);
+        controller.setValue('discount', 0);
+      }
+    }
+  }
+};
+```
+
+#### 규칙 분리 패턴 (권장)
+
+복잡한 프로젝트에서는 의존성 규칙을 별도 파일로 관리:
+
+```jsx
+// utils/searchDependencies.ts
+export const productSearchDependencies: Record<string, FieldDependencyHandler> = {
+  city: { /* ... */ },
+  discount: { /* ... */ },
+};
+
+// components/ProductSearch.tsx
+import { productSearchDependencies } from '@/utils/searchDependencies';
+
+<SearchProvider config={config} onDepends={productSearchDependencies}>
+  {/* ... */}
+</SearchProvider>
+```
+
+#### 동작 방식
+
+1. 의존성 필드 (dependencies)의 값이 변경되면 자동으로 handler 실행
+2. handler에서 FieldController API를 사용하여 대상 필드 제어
+3. 초기 렌더링 시에도 모든 handler가 한 번 실행되어 초기 상태 설정
+4. Config는 순수하게 유지되어 JSON 직렬화 가능
+
+#### 장점
+
+- ✅ Config와 비즈니스 로직 분리
+- ✅ 재사용 가능한 의존성 규칙
+- ✅ 타입 안전성 보장
+- ✅ 테스트 용이성
+- ✅ 선언적이고 읽기 쉬운 코드
 
 ## 성능 최적화
 
