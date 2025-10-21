@@ -136,10 +136,25 @@ function CustomField({ fieldName }) {
 검색 컨텍스트를 제공하는 최상위 컴포넌트
 
 ```tsx
-<SearchProvider config={config}>
+<SearchProvider
+  config={config}
+  onSubmit={(data) => console.log(data)}
+  onReset={() => console.log('reset')}
+  onChange={(name, value, values) => console.log(name, value)}
+  onDepends={dependencyRules}  // 필드 간 의존성 설정
+  initialValues={initialValues}
+>
   {children}
 </SearchProvider>
 ```
+
+**Props:**
+- `config`: 검색 폼 설정 (필수)
+- `onSubmit`: 폼 제출 시 호출되는 함수
+- `onReset`: 폼 초기화 시 호출되는 함수
+- `onChange`: 필드 값 변경 시 호출되는 함수
+- `onDepends`: 필드 간 의존성 규칙 정의
+- `initialValues`: 폼 초기값
 
 #### `<Field>`
 필드를 렌더링하는 컴포넌트
@@ -249,12 +264,23 @@ interface SearchConfig {
   id: string;                    // 폼 ID
   name?: string;                  // 폼 이름
   fields: FieldMeta[];           // 필드 정의
-  onSubmit?: (data) => void;     // 제출 핸들러
-  onReset?: () => void;          // 리셋 핸들러
-  onChange?: (data) => void;     // 변경 핸들러
   autoSubmit?: boolean;          // 자동 제출
   autoSubmitDelay?: number;      // 자동 제출 지연(ms)
   defaultValues?: object;        // 기본값
+}
+
+interface SearchProviderProps {
+  config: SearchConfig;                              // 폼 설정
+  onSubmit?: (data) => void;                        // 제출 핸들러
+  onReset?: () => void;                             // 리셋 핸들러
+  onChange?: (name, value, values) => void;         // 변경 핸들러
+  onDepends?: Record<string, FieldDependencyHandler>; // 필드 의존성 규칙
+  initialValues?: object;                           // 초기값
+}
+
+interface FieldDependencyHandler {
+  dependencies: string[];                           // 의존하는 필드 이름 배열
+  handler: (values, controller) => void;            // 의존성 변경 시 실행
 }
 
 interface FieldMeta {
@@ -274,6 +300,152 @@ interface FieldMeta {
 ```
 
 ## 📖 고급 사용법
+
+### 필드 간 의존성 관리 (onDepends) ✨
+
+필드 간 의존성을 선언적으로 관리할 수 있습니다. Config는 순수하게 유지하고, 비즈니스 로직은 `onDepends`로 분리합니다.
+
+#### 기본 예제: 국가/도시 선택
+
+```tsx
+import { SearchProvider, Field } from 'sd-search-box';
+import type { FieldDependencyHandler, FieldValues, FieldController } from 'sd-search-box';
+
+// 1. Config는 순수하게 유지 (JSON 직렬화 가능)
+const config = {
+  id: 'location-search',
+  fields: [
+    {
+      name: 'country',
+      type: 'select',
+      label: '국가',
+      options: [
+        { label: '한국', value: 'korea' },
+        { label: '미국', value: 'usa' },
+      ],
+    },
+    {
+      name: 'city',
+      type: 'select',
+      label: '도시',
+      disabled: true,  // 초기에는 비활성화
+      options: [],     // 초기에는 빈 배열
+    },
+  ],
+};
+
+// 2. 비즈니스 로직은 onDepends로 분리
+const dependencies: Record<string, FieldDependencyHandler> = {
+  city: {
+    dependencies: ['country'],  // country 필드에 의존
+    handler: (values: FieldValues, controller: FieldController) => {
+      const { country } = values;
+
+      if (!country) {
+        // 국가가 선택되지 않으면 도시 비활성화
+        controller.setFieldDisabled('city', true);
+        controller.setFieldOptions('city', []);
+        controller.setValue('city', '');
+      } else {
+        // 국가가 선택되면 해당 도시 목록 설정
+        controller.setFieldDisabled('city', false);
+        controller.setFieldOptions('city', getCitiesByCountry(country));
+      }
+    },
+  },
+};
+
+// 3. Provider에 전달
+function SearchForm() {
+  return (
+    <SearchProvider config={config} onDepends={dependencies}>
+      <Field name="country" />
+      <Field name="city" />
+    </SearchProvider>
+  );
+}
+```
+
+#### FieldController API
+
+onDepends handler에서 사용할 수 있는 필드 제어 API:
+
+```typescript
+controller.setValue(fieldName, value)              // 필드 값 설정
+controller.setFieldDisabled(fieldName, disabled)   // 비활성화 상태 설정
+controller.setFieldReadonly(fieldName, readonly)   // 읽기 전용 설정
+controller.setFieldOptions(fieldName, options)     // 옵션 목록 설정
+controller.setFieldPlaceholder(fieldName, text)    // placeholder 설정
+controller.setFieldLabel(fieldName, text)          // label 설정
+controller.updateFieldMeta(fieldName, meta)        // 메타 정보 일괄 업데이트
+controller.getValue(fieldName)                     // 현재 필드 값 가져오기
+controller.getValues()                             // 전체 폼 값 가져오기
+```
+
+#### 복합 의존성 예제
+
+여러 필드에 의존하는 경우:
+
+```tsx
+const dependencies = {
+  discount: {
+    dependencies: ['customerGrade', 'totalAmount'],  // 두 필드에 의존
+    handler: (values: FieldValues, controller: FieldController) => {
+      const { customerGrade, totalAmount } = values;
+
+      // VIP이고 10만원 이상이면 할인 가능
+      if (customerGrade === 'vip' && totalAmount >= 100000) {
+        controller.setFieldDisabled('discount', false);
+        controller.setFieldPlaceholder('discount', '최대 30% 할인 가능');
+        controller.updateFieldMeta('discount', {
+          validation: {
+            max: { value: 30, message: '30%를 초과할 수 없습니다' }
+          }
+        });
+      } else {
+        controller.setFieldDisabled('discount', true);
+        controller.setValue('discount', 0);
+      }
+    },
+  },
+};
+```
+
+#### 의존성 규칙 분리 (권장 패턴)
+
+복잡한 프로젝트에서는 의존성 규칙을 별도 파일로 관리:
+
+```tsx
+// utils/searchDependencies.ts
+export const productSearchDependencies: Record<string, FieldDependencyHandler> = {
+  city: {
+    dependencies: ['country'],
+    handler: (values: FieldValues, controller: FieldController) => {
+      // 로직...
+    },
+  },
+  discount: {
+    dependencies: ['customerGrade', 'totalAmount'],
+    handler: (values: FieldValues, controller: FieldController) => {
+      // 로직...
+    },
+  },
+};
+
+// components/ProductSearch.tsx
+import { productSearchDependencies } from '@/utils/searchDependencies';
+
+function ProductSearch() {
+  return (
+    <SearchProvider
+      config={config}
+      onDepends={productSearchDependencies}
+    >
+      {/* ... */}
+    </SearchProvider>
+  );
+}
+```
 
 ### 조건부 필드
 
@@ -331,6 +503,7 @@ function ProductList() {
 - SearchButtons 유틸리티 컴포넌트
 - 조건부 렌더링
 - 배열 필드 지원
+- **필드 간 의존성 관리 (onDepends)** ✨
 - TypeScript 완벽 지원
 
 ### 🔄 진행 중
