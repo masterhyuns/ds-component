@@ -392,26 +392,24 @@ export const SearchTypeExample = () => {
  * 예제 4: 의존성 규칙을 별도 파일로 분리 (권장 패턴)
  * 복잡한 프로젝트에서는 의존성 규칙을 별도 파일로 관리하는 것이 좋음
  */
-
-// 실제 프로젝트에서는 이렇게 별도 파일로 관리:
-// utils/searchDependencies.ts
-export const productSearchDependencies: Record<string, FieldDependencyHandler> = {
-  city: {
-    dependencies: ['country'],
-    handler: (values: FieldValues, controller: FieldController) => {
-      const { country } = values;
-      if (!country) {
-        controller.setFieldDisabled('city', true);
-        controller.setFieldOptions('city', []);
-      } else {
-        controller.setFieldDisabled('city', false);
-        controller.setFieldOptions('city', getCitiesByCountry(country));
-      }
-    },
-  },
-};
-
 export const SeparatedDependenciesExample = () => {
+  // 실제 프로젝트에서는 이렇게 별도 파일로 관리:
+  // utils/searchDependencies.ts
+  const productSearchDependencies: Record<string, FieldDependencyHandler> = {
+    city: {
+      dependencies: ['country'],
+      handler: (values: FieldValues, controller: FieldController) => {
+        const { country } = values;
+        if (!country) {
+          controller.setFieldDisabled('city', true);
+          controller.setFieldOptions('city', []);
+        } else {
+          controller.setFieldDisabled('city', false);
+          controller.setFieldOptions('city', getCitiesByCountry(country));
+        }
+      },
+    },
+  };
   const config: SearchConfig = {
     id: 'separated-deps',
     fields: [
