@@ -9,7 +9,7 @@
  * 4. 자동 제출, onChange 콜백 등 부가 기능 처리
  */
 
-import React, { createContext, useContext, useMemo, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useMemo, useCallback, useEffect, useState } from 'react';
 import { useForm, FieldValues as RHFFieldValues, UseFormReturn } from 'react-hook-form';
 import {
   SearchContextValue,
@@ -18,6 +18,8 @@ import {
   FieldMeta,
   FieldValues,
   InternalAPI,
+  FieldController,
+  Option,
 } from '../types/search.types';
 
 /**
@@ -42,20 +44,30 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
   onChange,
   children,
   initialValues,
+  onDepends,
 }) => {
+  /**
+   * 동적 필드 메타 상태
+   * onDepends 핸들러를 통해 런타임에 변경되는 필드 속성들을 저장
+   * 예: disabled, options, placeholder, label 등
+   *
+   * 구조: { [fieldName]: { disabled: true, options: [...], ... } }
+   */
+  const [dynamicFieldMeta, setDynamicFieldMeta] = useState<Record<string, Partial<FieldMeta>>>({});
+
   // 기본값 설정
   // initialValues와 필드별 defaultValue를 병합하여 최종 기본값 생성
   // 우선순위: initialValues > field.defaultValue
   const defaultValues: FieldValues = useMemo(() => {
     const values: FieldValues = { ...initialValues };
-    
+
     // 각 필드의 defaultValue가 있고, initialValues에 해당 값이 없으면 추가
     config.fields.forEach((field) => {
       if (field.defaultValue !== undefined && values[field.name] === undefined) {
         values[field.name] = field.defaultValue;
       }
     });
-    
+
     return values;
   }, [config.fields, initialValues]);
 
@@ -121,14 +133,11 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     
     // 특정 필드 값 설정
     setValue: (name: string, value: any) => {
-      rhfSetValue(name, value, { 
+      rhfSetValue(name, value, {
         shouldValidate: true,  // 유효성 검사 실행
         shouldDirty: true      // dirty 상태로 표시
       });
-      // onChange 콜백 호출
-      if (onChange) {
-        onChange(name, value, rhfGetValues());
-      }
+      // onChange는 watch 구독에서 처리되므로 여기서는 호출하지 않음
     },
     
     // 전체 폼 유효성 검사 수동 실행
@@ -158,33 +167,268 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     config,
   ]);
 
-  // 필드 메타 정보 가져오기
-  // 필드 이름으로 해당 필드의 설정 정보를 찾아 반환
-  const getFieldMeta = useCallback(
-    (name: string): FieldMeta | undefined => {
-      return config.fields.find((field) => field.name === name);
-    },
-    [config.fields]
+  /**
+   * FieldController 구현
+   * onDepends 핸들러에서 필드를 동적으로 제어하기 위한 API
+   *
+   * 주요 역할:
+   * - 필드 값 설정
+   * - 필드 속성 동적 변경 (disabled, options, placeholder 등)
+   * - 필드 메타 정보 업데이트
+   */
+  const fieldController: FieldController = useMemo(
+    () => ({
+      /**
+       * 필드 값 설정
+       * react-hook-form의 setValue를 래핑
+       */
+      setValue: (fieldName: string, value: any) => {
+        rhfSetValue(fieldName, value, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      },
+
+      /**
+       * 필드 비활성화 상태 설정
+       * 동적 메타 상태에 disabled 속성 업데이트
+       *
+       * @example
+       * controller.setFieldDisabled('city', true); // city 필드 비활성화
+       */
+      setFieldDisabled: (fieldName: string, disabled: boolean) => {
+        setDynamicFieldMeta((prev) => ({
+          ...prev,
+          [fieldName]: { ...prev[fieldName], disabled },
+        }));
+      },
+
+      /**
+       * 필드 읽기 전용 상태 설정
+       * 동적 메타 상태에 readonly 속성 업데이트
+       */
+      setFieldReadonly: (fieldName: string, readonly: boolean) => {
+        setDynamicFieldMeta((prev) => ({
+          ...prev,
+          [fieldName]: { ...prev[fieldName], readonly },
+        }));
+      },
+
+      /**
+       * 필드 옵션 설정 (select, multiselect 등)
+       * 동적 메타 상태에 options 배열 업데이트
+       *
+       * @example
+       * controller.setFieldOptions('city', [
+       *   { label: '서울', value: 'seoul' },
+       *   { label: '부산', value: 'busan' }
+       * ]);
+       */
+      setFieldOptions: (fieldName: string, options: Option[]) => {
+        setDynamicFieldMeta((prev) => ({
+          ...prev,
+          [fieldName]: { ...prev[fieldName], options },
+        }));
+      },
+
+      /**
+       * 필드 placeholder 설정
+       * 동적 메타 상태에 placeholder 업데이트
+       */
+      setFieldPlaceholder: (fieldName: string, placeholder: string) => {
+        setDynamicFieldMeta((prev) => ({
+          ...prev,
+          [fieldName]: { ...prev[fieldName], placeholder },
+        }));
+      },
+
+      /**
+       * 필드 label 설정
+       * 동적 메타 상태에 label 업데이트
+       */
+      setFieldLabel: (fieldName: string, label: string) => {
+        setDynamicFieldMeta((prev) => ({
+          ...prev,
+          [fieldName]: { ...prev[fieldName], label },
+        }));
+      },
+
+      /**
+       * 필드 메타 정보 일괄 업데이트
+       * 여러 속성을 한 번에 업데이트할 때 사용
+       *
+       * @example
+       * controller.updateFieldMeta('discount', {
+       *   disabled: false,
+       *   placeholder: '최대 30% 할인 가능',
+       *   validation: { max: { value: 30, message: '30% 초과 불가' } }
+       * });
+       */
+      updateFieldMeta: (fieldName: string, meta: Partial<FieldMeta>) => {
+        setDynamicFieldMeta((prev) => ({
+          ...prev,
+          [fieldName]: { ...prev[fieldName], ...meta },
+        }));
+      },
+
+      /**
+       * 현재 필드 값 가져오기
+       */
+      getValue: (fieldName: string) => {
+        return rhfGetValues(fieldName);
+      },
+
+      /**
+       * 전체 폼 값 가져오기
+       */
+      getValues: () => {
+        return rhfGetValues();
+      },
+    }),
+    [rhfSetValue, rhfGetValues]
   );
 
-  // onChange 콜백은 이제 setValue에서 처리됨
+  /**
+   * 필드 메타 정보 가져오기 (동적 메타 병합)
+   * config의 정적 메타와 동적으로 변경된 메타를 병합하여 반환
+   *
+   * 병합 순서: config 정적 메타 <- 동적 메타 (동적 메타가 우선)
+   *
+   * @example
+   * // config에서 city 필드의 disabled가 false였지만
+   * // onDepends에서 setFieldDisabled('city', true) 호출 후
+   * // getFieldMeta('city')는 disabled: true를 반환
+   */
+  const getFieldMeta = useCallback(
+    (name: string): FieldMeta | undefined => {
+      const staticMeta = config.fields.find((field) => field.name === name);
+      if (!staticMeta) return undefined;
+
+      // 동적 메타가 있으면 병합
+      const dynamicMeta = dynamicFieldMeta[name];
+      if (dynamicMeta) {
+        return { ...staticMeta, ...dynamicMeta };
+      }
+
+      return staticMeta;
+    },
+    [config.fields, dynamicFieldMeta]
+  );
+
+  /**
+   * onChange 콜백 처리 - 모든 필드 변경 감지
+   * 필드 값이 변경될 때마다 onChange 핸들러 호출
+   */
+  useEffect(() => {
+    if (!onChange) return;
+
+    const subscription = watch((value, { name }) => {
+      // name이 있으면 특정 필드가 변경된 것
+      if (name) {
+        onChange(name, value[name], value);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, onChange]);
+
+  /**
+   * onDepends 처리 로직
+   * 필드 간 의존성을 자동으로 관리
+   *
+   * 동작 방식:
+   * 1. 모든 onDepends의 dependencies를 수집하여 Set 생성
+   * 2. watch를 통해 의존성 필드의 변경 감지
+   * 3. 변경된 필드에 의존하는 모든 핸들러 실행
+   * 4. 핸들러에서 fieldController를 통해 다른 필드 제어
+   *
+   * @example
+   * onDepends={{
+   *   city: {
+   *     dependencies: ['country'],
+   *     handler: (values, controller) => {
+   *       if (!values.country) {
+   *         controller.setFieldDisabled('city', true);
+   *         controller.setFieldOptions('city', []);
+   *       } else {
+   *         controller.setFieldDisabled('city', false);
+   *         controller.setFieldOptions('city', getCities(values.country));
+   *       }
+   *     }
+   *   }
+   * }}
+   */
+  useEffect(() => {
+    if (!onDepends) return;
+
+    // 모든 의존성 필드를 수집
+    // Set을 사용하여 중복 제거 및 O(1) 조회 성능 확보
+    const allDependencies = new Set<string>();
+    Object.values(onDepends).forEach((handler) => {
+      handler.dependencies.forEach((dep) => allDependencies.add(dep));
+    });
+
+    // 의존성 필드들의 값 변경 감시
+    const subscription = watch((values, { name }) => {
+      // 변경된 필드가 의존성 목록에 있는지 확인
+      if (name && allDependencies.has(name)) {
+        // 이 필드에 의존하는 모든 핸들러 찾아서 실행
+        Object.entries(onDepends).forEach(([, handler]) => {
+          if (handler.dependencies.includes(name)) {
+            // 핸들러 실행: 현재 폼 값과 필드 컨트롤러 전달
+            handler.handler(values, fieldController);
+          }
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [onDepends, watch, fieldController]);
+
+  /**
+   * 초기 onDepends 실행
+   * 컴포넌트 마운트 시 모든 onDepends 핸들러를 한 번 실행
+   *
+   * 이유:
+   * - 초기 렌더링 시에도 의존성에 따른 필드 상태를 설정해야 함
+   * - 예: country가 초기값으로 설정되어 있으면 city 옵션도 초기화되어야 함
+   */
+  useEffect(() => {
+    if (!onDepends) return;
+
+    // 현재 폼의 모든 값 가져오기
+    const currentValues = rhfGetValues();
+
+    // 모든 onDepends 핸들러를 초기 실행
+    Object.entries(onDepends).forEach(([, handler]) => {
+      handler.handler(currentValues, fieldController);
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 빈 배열: 마운트 시 한 번만 실행
 
   // 자동 제출 처리
   // autoSubmit이 true면 값 변경 후 지정된 시간(기본 500ms) 후 자동 제출
   useEffect(() => {
-    // autoSubmit이 활성화되어 있지 않으면 early return
     if (!config.autoSubmit) {
       return;
     }
-    
+
     const delay: number = config.autoSubmitDelay ?? 500;
-    const timer = setTimeout(() => {
-      formAPI.submit();
-    }, delay);
-    
-    // cleanup 함수로 타이머 정리
-    return () => clearTimeout(timer);
-  }, [watch(), config.autoSubmit, config.autoSubmitDelay, formAPI]); // watch()를 의존성에 포함하여 값 변경 감지
+    let timer: ReturnType<typeof setTimeout>;
+
+    const subscription = watch(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        formAPI.submit();
+      }, delay);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, [config.autoSubmit, config.autoSubmitDelay, formAPI, watch]);
 
   // Context 값
   // 하위 컴포넌트들이 useSearchContext를 통해 접근할 수 있는 값들

@@ -250,6 +250,42 @@ export interface SearchEventHandlers<TFieldValues extends FieldValues = FieldVal
 }
 
 /**
+ * 필드 의존성 핸들러
+ * 특정 필드의 값이 변경될 때 다른 필드의 속성을 동적으로 제어
+ */
+export interface FieldDependencyHandler<TFieldValues extends FieldValues = FieldValues> {
+  /** 의존하는 필드 이름 배열 */
+  dependencies: string[];
+  /** 의존 필드 변경 시 실행되는 핸들러 */
+  handler: (values: TFieldValues, controller: FieldController) => void;
+}
+
+/**
+ * 필드 컨트롤러
+ * onDepends handler에서 필드를 동적으로 제어하기 위한 API
+ */
+export interface FieldController {
+  /** 필드 값 설정 */
+  setValue: (fieldName: string, value: any) => void;
+  /** 필드 비활성화 상태 설정 */
+  setFieldDisabled: (fieldName: string, disabled: boolean) => void;
+  /** 필드 읽기 전용 상태 설정 */
+  setFieldReadonly: (fieldName: string, readonly: boolean) => void;
+  /** 필드 옵션 설정 (select, multiselect 등) */
+  setFieldOptions: (fieldName: string, options: Option[]) => void;
+  /** 필드 placeholder 설정 */
+  setFieldPlaceholder: (fieldName: string, placeholder: string) => void;
+  /** 필드 label 설정 */
+  setFieldLabel: (fieldName: string, label: string) => void;
+  /** 필드 메타 정보 일괄 업데이트 */
+  updateFieldMeta: (fieldName: string, meta: Partial<FieldMeta>) => void;
+  /** 현재 필드 값 가져오기 */
+  getValue: (fieldName: string) => any;
+  /** 전체 폼 값 가져오기 */
+  getValues: () => FieldValues;
+}
+
+/**
  * SearchProvider Props
  * 새로운 API의 Provider 컴포넌트 Props
  */
@@ -260,6 +296,8 @@ export interface SearchProviderProps<TFieldValues extends FieldValues = FieldVal
   children: ReactNode;
   /** 초기값 (URL, localStorage 등에서 복원) */
   initialValues?: TFieldValues;
+  /** 필드 간 의존성 설정 */
+  onDepends?: Record<string, FieldDependencyHandler<TFieldValues>>;
 }
 
 /**
