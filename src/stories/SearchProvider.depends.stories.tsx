@@ -7,7 +7,7 @@ import type { Meta } from '@storybook/react';
 import { SearchProvider } from '../context/SearchContext';
 import { Field } from '../components/Field';
 import { SearchButtons } from '../components/SearchButtons';
-import { SearchConfig, FieldDependencyHandler, Option } from '../types';
+import { SearchConfig, FieldDependencyHandler, Option, FieldValues, FieldController } from '../types';
 
 const meta: Meta = {
   title: 'Examples/onDepends',
@@ -89,7 +89,7 @@ export const CountryCityExample = () => {
     // city 필드는 country 필드에 의존
     city: {
       dependencies: ['country'],
-      handler: (values, controller) => {
+      handler: (values: FieldValues, controller: FieldController) => {
         const { country } = values;
 
         if (!country) {
@@ -182,7 +182,7 @@ export const DiscountExample = () => {
     // discount는 customerGrade와 totalAmount 두 필드에 의존
     discount: {
       dependencies: ['customerGrade', 'totalAmount'],
-      handler: (values, controller) => {
+      handler: (values: FieldValues, controller: FieldController) => {
         const { customerGrade, totalAmount } = values;
 
         // 할인율 규칙 정의
@@ -306,7 +306,7 @@ export const SearchTypeExample = () => {
     // category는 searchType에 의존
     category: {
       dependencies: ['searchType'],
-      handler: (values, controller) => {
+      handler: (values: FieldValues, controller: FieldController) => {
         const { searchType } = values;
 
         if (searchType === 'product') {
@@ -345,7 +345,7 @@ export const SearchTypeExample = () => {
     // dateRange는 searchType에 의존
     dateRange: {
       dependencies: ['searchType'],
-      handler: (values, controller) => {
+      handler: (values: FieldValues, controller: FieldController) => {
         const { searchType } = values;
 
         if (searchType === 'order') {
@@ -398,7 +398,7 @@ export const SearchTypeExample = () => {
 export const productSearchDependencies: Record<string, FieldDependencyHandler> = {
   city: {
     dependencies: ['country'],
-    handler: (values, controller) => {
+    handler: (values: FieldValues, controller: FieldController) => {
       const { country } = values;
       if (!country) {
         controller.setFieldDisabled('city', true);
