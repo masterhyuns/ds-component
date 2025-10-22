@@ -412,6 +412,22 @@ export interface SearchFormAPI {
   setValue: (name: string, value: any) => void;
   /** 유효성 검사 */
   validate: () => Promise<boolean>;
+  /**
+   * 폼 값 변경 구독
+   * 초기값을 즉시 emit하고, 이후 값이 변경될 때마다 콜백 호출
+   *
+   * @param callback - 폼 값이 변경될 때 호출될 콜백 함수
+   * @returns unsubscribe 함수 (구독 해제용)
+   *
+   * @example
+   * const unsubscribe = formRef.current?.subscribe((values) => {
+   *   console.log('폼 값:', values);
+   * });
+   *
+   * // 구독 해제
+   * unsubscribe();
+   */
+  subscribe: (callback: (values: FieldValues) => void) => () => void;
   /** 폼 상태 */
   isSubmitting: boolean;
   isValidating: boolean;

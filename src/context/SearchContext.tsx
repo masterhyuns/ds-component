@@ -108,7 +108,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
         }
       })(); // 즉시 실행을 위해 () 추가
     },
-    
+
     // 폼 초기화 - 기본값으로 리셋하고 onReset 콜백 실행
     reset: () => {
       rhfReset(defaultValues);
@@ -116,23 +116,23 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
         onReset();
       }
     },
-    
+
     // 전체 폼 값 가져오기
     getValues: () => rhfGetValues(),
-    
+
     // 여러 필드 값을 한번에 설정
     setValues: (values: FieldValues) => {
       Object.entries(values).forEach(([key, value]) => {
-        rhfSetValue(key, value, { 
+        rhfSetValue(key, value, {
           shouldValidate: true,  // 값 설정 후 유효성 검사 실행
           shouldDirty: true      // 필드를 dirty 상태로 표시 (수정됨)
         });
       });
     },
-    
+
     // 특정 필드 값 가져오기
     getValue: (name: string) => rhfGetValues(name),
-    
+
     // 특정 필드 값 설정
     setValue: (name: string, value: any) => {
       rhfSetValue(name, value, {
@@ -141,18 +141,54 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
       });
       // onChange는 watch 구독에서 처리되므로 여기서는 호출하지 않음
     },
-    
+
     // 전체 폼 유효성 검사 수동 실행
     validate: async () => {
       return await trigger();
     },
-    
+
+    /**
+     * 폼 값 변경 구독
+     * react-hook-form의 watch를 활용하여 폼 값 변경을 실시간으로 구독
+     *
+     * 동작 방식:
+     * 1. 즉시 현재 폼 값으로 콜백을 한 번 호출 (초기값 emit)
+     * 2. 이후 값이 변경될 때마다 콜백 호출
+     * 3. unsubscribe 함수 반환
+     *
+     * @param callback - 폼 값이 변경될 때 호출될 콜백
+     * @returns unsubscribe 함수
+     *
+     * @example
+     * const unsubscribe = formAPI.subscribe((values) => {
+     *   console.log('현재 폼 값:', values);
+     * });
+     *
+     * // 나중에 구독 해제
+     * unsubscribe();
+     */
+    subscribe: (callback: (values: FieldValues) => void) => {
+      // 1. 즉시 현재 값으로 콜백 호출 (초기값 emit)
+      callback(rhfGetValues());
+
+      // 2. watch를 사용하여 변경 감지
+      const subscription = watch((values) => {
+        // 값이 변경될 때마다 콜백 호출
+        callback(values as FieldValues);
+      });
+
+      // 3. unsubscribe 함수 반환
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+
     // 폼 상태 플래그들
     isSubmitting: formState.isSubmitting,   // 제출 중인지
     isValidating: formState.isValidating,   // 유효성 검사 중인지
     isDirty: formState.isDirty,             // 폼이 수정되었는지
     isValid: formState.isValid,             // 폼이 유효한지
-    
+
     // 에러 객체를 단순화 (FieldError 객체를 문자열로 변환)
     errors: Object.entries(formState.errors).reduce((acc, [key, error]) => {
       acc[key] = (error as any)?.message || 'Validation error';
@@ -167,6 +203,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     formState,
     defaultValues,
     config,
+    watch,
   ]);
 
   /**

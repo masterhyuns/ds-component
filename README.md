@@ -568,6 +568,87 @@ searchFormRef.current?.errors       // 에러 목록
 - SearchProvider 내부에서만 사용한다면 `useSearchForm()` 훅 사용
 - 단순히 onChange로 값을 받고 싶다면 `onChange` prop 사용
 
+### 외부에서 실시간 폼 값 렌더링 (useFormRefValues) 🎯
+
+`useFormRefValues` 훅을 사용하면 **formRef만으로** 외부에서 실시간 폼 값을 렌더링할 수 있습니다.
+
+#### onChange의 한계
+
+onChange는 **값이 변경될 때만** 호출되므로 초기값이나 첫 렌더링 시 폼 값을 받을 수 없습니다:
+
+```tsx
+const [formValues, setFormValues] = useState({});
+
+<SearchProvider
+  onChange={(name, value, allValues) => {
+    setFormValues(allValues); // 변경 시에만 호출됨
+  }}
+>
+  <Field name="keyword" defaultValue="React" />
+</SearchProvider>
+
+// ❌ 첫 렌더링 시 formValues는 빈 객체!
+<div>{formValues.keyword}</div> // undefined
+```
+
+#### useFormRefValues 솔루션 ✅
+
+```tsx
+import { useRef } from 'react';
+import { SearchProvider, Field, useFormRefValues } from 'sd-search-box';
+import type { SearchFormAPI } from 'sd-search-box';
+
+function MyPage() {
+  const formRef = useRef<SearchFormAPI>(null);
+
+  // 🎉 초기값부터 모든 변경사항을 실시간으로 받음!
+  const formValues = useFormRefValues(formRef);
+
+  return (
+    <div>
+      <SearchProvider formRef={formRef} config={config}>
+        <Field name="keyword" defaultValue="React" />
+        <Field name="category" defaultValue="all" />
+      </SearchProvider>
+
+      {/* ✅ 첫 렌더링부터 값이 표시됨 */}
+      <div className="live-preview">
+        <h3>현재 검색 조건</h3>
+        <p>키워드: {formValues.keyword}</p>
+        <p>카테고리: {formValues.category}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+#### 타입 지정
+
+```tsx
+interface SearchFormValues {
+  keyword: string;
+  category: string;
+  minPrice?: number;
+}
+
+const formValues = useFormRefValues<SearchFormValues>(formRef);
+// formValues.keyword는 string 타입으로 추론됨
+```
+
+#### useFormRefValues vs onChange
+
+| 특징 | useFormRefValues | onChange |
+|------|-----------------|----------|
+| 초기값 | ✅ 즉시 받음 | ❌ 받지 못함 |
+| 변경 감지 | ✅ 자동 | ✅ 자동 |
+| 사용 편의성 | ✅ 훅 하나로 끝 | ❌ state + 콜백 필요 |
+| 실시간 렌더링 | ✅ 완벽 지원 | ⚠️ 초기값 처리 필요 |
+
+**권장 사항:**
+- 외부에서 실시간 폼 값을 렌더링하려면 `useFormRefValues` 사용
+- 값 변경 시 특정 로직을 실행하려면 `onChange` 사용
+- 둘 다 필요하면 함께 사용 가능
+
 ### 조건부 필드
 
 ```tsx

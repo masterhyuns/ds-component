@@ -8,6 +8,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { SearchProvider } from '../context/SearchContext';
 import { Field } from '../components/Field';
 import { SearchButtons } from '../components/SearchButtons';
+import { useFormRefValues } from '../hooks/useFormRefValues';
 import type { SearchConfig, SearchFormAPI } from '../types/search.types';
 
 const meta: Meta<typeof SearchProvider> = {
@@ -458,5 +459,164 @@ export const FormStateMonitoring: Story = {
     };
 
     return <MonitoringExample />;
+  },
+};
+
+/**
+ * useFormRefValues 훅 사용 예제
+ * formRef만으로 외부에서 실시간 폼 값 렌더링
+ */
+export const UseFormRefValuesExample: Story = {
+  render: () => {
+    const FormRefValuesDemo = () => {
+      const formRef = useRef<SearchFormAPI>(null);
+
+      // 🎉 useFormRefValues 훅으로 실시간 폼 값 받기!
+      const formValues = useFormRefValues(formRef);
+
+      const config: SearchConfig = {
+        id: 'formref-values',
+        fields: [
+          {
+            id: 'keyword',
+            name: 'keyword',
+            type: 'text',
+            label: '검색어',
+            placeholder: '검색어를 입력하세요',
+            defaultValue: 'React',
+          },
+          {
+            id: 'category',
+            name: 'category',
+            type: 'select',
+            label: '카테고리',
+            options: [
+              { label: '전체', value: 'all' },
+              { label: '프론트엔드', value: 'frontend' },
+              { label: '백엔드', value: 'backend' },
+            ],
+            defaultValue: 'all',
+          },
+          {
+            id: 'minPrice',
+            name: 'minPrice',
+            type: 'text',
+            label: '최소 가격',
+            placeholder: '0',
+          },
+          {
+            id: 'maxPrice',
+            name: 'maxPrice',
+            type: 'text',
+            label: '최대 가격',
+            placeholder: '10000',
+          },
+        ],
+      };
+
+      return (
+        <div style={{ display: 'flex', gap: '2rem' }}>
+          <div style={{ flex: 1 }}>
+            <h3>폼</h3>
+            <SearchProvider
+              config={config}
+              formRef={formRef}
+              onSubmit={(data) => {
+                alert(`검색 실행:\n${JSON.stringify(data, null, 2)}`);
+              }}
+            >
+              <Field name="keyword" />
+              <Field name="category" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <Field name="minPrice" />
+                <Field name="maxPrice" />
+              </div>
+              <SearchButtons />
+            </SearchProvider>
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <h3>실시간 폼 값 (useFormRefValues)</h3>
+            <div
+              style={{
+                background: '#f0f8ff',
+                padding: '1.5rem',
+                borderRadius: '8px',
+                border: '2px solid #4a90e2',
+              }}
+            >
+              <h4 style={{ marginTop: 0, color: '#4a90e2' }}>현재 검색 조건</h4>
+              <div style={{ display: 'grid', gap: '0.75rem' }}>
+                <div>
+                  <strong>검색어:</strong>{' '}
+                  <span style={{ color: '#333' }}>{formValues.keyword || '(없음)'}</span>
+                </div>
+                <div>
+                  <strong>카테고리:</strong>{' '}
+                  <span style={{ color: '#333' }}>{formValues.category || '(없음)'}</span>
+                </div>
+                <div>
+                  <strong>가격 범위:</strong>{' '}
+                  <span style={{ color: '#333' }}>
+                    {formValues.minPrice || '0'} ~ {formValues.maxPrice || '10000'}원
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #ddd' }}>
+                <h4 style={{ fontSize: '14px', color: '#666' }}>빠른 설정</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => {
+                      formRef.current?.setValues({
+                        keyword: '타입스크립트',
+                        category: 'frontend',
+                        minPrice: '30000',
+                        maxPrice: '50000',
+                      });
+                    }}
+                    style={{ padding: '0.5rem' }}
+                  >
+                    타입스크립트 강의 검색
+                  </button>
+                  <button
+                    onClick={() => {
+                      formRef.current?.setValues({
+                        keyword: 'Node.js',
+                        category: 'backend',
+                        minPrice: '20000',
+                        maxPrice: '40000',
+                      });
+                    }}
+                    style={{ padding: '0.5rem' }}
+                  >
+                    Node.js 강의 검색
+                  </button>
+                  <button
+                    onClick={() => {
+                      formRef.current?.reset();
+                    }}
+                    style={{ padding: '0.5rem', background: '#f5f5f5' }}
+                  >
+                    초기화
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1rem', fontSize: '13px', color: '#666' }}>
+              <strong>💡 포인트:</strong>
+              <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+                <li>onChange 없이도 실시간 값 받기 가능</li>
+                <li>초기값부터 자동으로 표시됨</li>
+                <li>타입 안전성 보장</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    return <FormRefValuesDemo />;
   },
 };
