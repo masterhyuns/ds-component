@@ -178,7 +178,8 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
   const customStyles: SelectProps<ReactSelectOption>['styles'] = {
     control: (provided, state) => ({
       ...provided,
-      minHeight: '38px',
+      minHeight: '30px',
+      height: '30px',
       borderColor: error
         ? 'var(--color-error, #dc3545)'
         : state.isFocused
@@ -194,6 +195,22 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
           ? 'var(--color-error, #dc3545)'
           : 'var(--color-primary, #0d6efd)',
       },
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      height: '30px',
+      padding: '0 8px',
+      display: 'flex',
+      alignItems: 'center',
+    }),
+    input: (provided) => ({
+      ...provided,
+      margin: '0',
+      padding: '0',
+    }),
+    indicatorsContainer: (provided) => ({
+      ...provided,
+      height: '30px',
     }),
     option: (provided, state) => ({
       ...provided,
