@@ -11,6 +11,7 @@ export { Field } from './components/Field';
 export { SearchButtons } from './components/SearchButtons';
 export { TextField } from './components/fields/TextField';
 export { SelectField } from './components/fields/SelectField';
+export { SelectBox } from './components/SelectBox';
 
 // 레이아웃 컴포넌트
 export { Grid, GridItem } from './components/Grid';
@@ -40,6 +41,9 @@ export type {
   SearchFormAPI,
   SearchContextValue,
 } from './types/search.types';
+
+// SelectBox 타입
+export type { SelectBoxProps } from './components/SelectBox';
 
 // Grid 레이아웃 타입
 export type {

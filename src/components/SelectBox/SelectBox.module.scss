@@ -1,0 +1,33 @@
+/**
+ * SelectBox 스타일
+ * react-select 기반 독립 컴포넌트 스타일링
+ */
+
+.selectBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text, #212529);
+  margin-bottom: 0.25rem;
+}
+
+.required {
+  color: var(--color-error, #dc3545);
+  margin-left: 0.25rem;
+}
+
+.select {
+  width: 100%;
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  color: var(--color-error, #dc3545);
+  margin-top: 0.25rem;
+}
