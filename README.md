@@ -276,6 +276,7 @@ interface SearchProviderProps {
   onChange?: (name, value, values) => void;         // 변경 핸들러
   onDepends?: Record<string, FieldDependencyHandler>; // 필드 의존성 규칙
   initialValues?: object;                           // 초기값
+  formRef?: React.RefObject<SearchFormAPI>;         // 외부 폼 제어용 ref
 }
 
 interface FieldDependencyHandler {
@@ -446,6 +447,126 @@ function ProductSearch() {
   );
 }
 ```
+
+### 외부에서 폼 제어하기 (formRef) ✨
+
+`formRef`를 사용하면 SearchProvider **외부**에서 폼 API에 접근할 수 있습니다.
+
+#### 기본 사용법
+
+```tsx
+import { useRef } from 'react';
+import { SearchProvider, Field } from 'sd-search-box';
+import type { SearchFormAPI } from 'sd-search-box';
+
+function MyPage() {
+  // 1. ref 생성
+  const searchFormRef = useRef<SearchFormAPI>(null);
+
+  // 2. 외부에서 폼 제어
+  const handleExternalAction = () => {
+    // 현재 폼 값 가져오기
+    const values = searchFormRef.current?.getValues();
+    console.log('현재 검색 조건:', values);
+
+    // 특정 필드 값 설정
+    searchFormRef.current?.setValue('keyword', '새로운 검색어');
+
+    // 폼 제출
+    searchFormRef.current?.submit();
+
+    // 폼 초기화
+    searchFormRef.current?.reset();
+  };
+
+  return (
+    <div>
+      {/* 3. formRef prop 전달 */}
+      <SearchProvider config={config} formRef={searchFormRef}>
+        <Field name="keyword" />
+        <Field name="category" />
+      </SearchProvider>
+
+      {/* 외부 컴포넌트에서 폼 제어 */}
+      <button onClick={handleExternalAction}>
+        외부에서 폼 조작
+      </button>
+    </div>
+  );
+}
+```
+
+#### 실시간 폼 값 표시
+
+```tsx
+function MyPage() {
+  const searchFormRef = useRef<SearchFormAPI>(null);
+  const [displayValues, setDisplayValues] = useState({});
+
+  return (
+    <div>
+      <SearchProvider
+        config={config}
+        formRef={searchFormRef}
+        onChange={(name, value, allValues) => {
+          // 폼 값이 변경될 때마다 외부 state 업데이트
+          setDisplayValues(allValues);
+        }}
+      >
+        <Field name="keyword" />
+      </SearchProvider>
+
+      {/* 외부에서 실시간 폼 값 표시 */}
+      <div className="search-summary">
+        <h3>현재 검색 조건</h3>
+        <p>키워드: {displayValues.keyword}</p>
+        <button onClick={() => {
+          // ref를 통해 직접 제어도 가능
+          searchFormRef.current?.setValue('keyword', 'RESET');
+        }}>
+          키워드 초기화
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+#### formRef API
+
+`formRef.current`로 접근 가능한 모든 메서드:
+
+```typescript
+// 값 조회
+searchFormRef.current?.getValues()        // 전체 값
+searchFormRef.current?.getValue('name')   // 특정 필드 값
+
+// 값 설정
+searchFormRef.current?.setValue('name', value)  // 특정 필드
+searchFormRef.current?.setValues({ ... })       // 전체 값
+
+// 폼 제어
+searchFormRef.current?.submit()     // 폼 제출
+searchFormRef.current?.reset()      // 폼 초기화
+searchFormRef.current?.validate()   // 유효성 검사
+
+// 폼 상태
+searchFormRef.current?.isSubmitting // 제출 중
+searchFormRef.current?.isDirty      // 수정 여부
+searchFormRef.current?.isValid      // 유효성
+searchFormRef.current?.errors       // 에러 목록
+```
+
+#### 언제 formRef를 사용하나요?
+
+**사용하는 경우:**
+- SearchProvider 외부에서 폼 값에 접근해야 할 때
+- 외부 버튼이나 이벤트로 폼을 제어해야 할 때
+- 다른 컴포넌트에서 폼 상태를 참조해야 할 때
+
+**사용하지 않는 경우:**
+- SearchProvider 내부에서만 사용한다면 `useSearchForm()` 훅 사용
+- 단순히 onChange로 값을 받고 싶다면 `onChange` prop 사용
 
 ### 조건부 필드
 

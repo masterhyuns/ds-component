@@ -298,6 +298,8 @@ export interface SearchProviderProps<TFieldValues extends FieldValues = FieldVal
   initialValues?: TFieldValues;
   /** 필드 간 의존성 설정 */
   onDepends?: Record<string, FieldDependencyHandler<TFieldValues>>;
+  /** 폼 API ref (외부에서 폼을 제어하기 위한 ref) */
+  formRef?: React.RefObject<SearchFormAPI | null>;
 }
 
 /**

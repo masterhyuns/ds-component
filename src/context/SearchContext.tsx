@@ -1,7 +1,7 @@
 /**
  * 검색 컨텍스트 및 Provider
  * react-hook-form을 완전히 캡슐화하여 사용자가 react-hook-form을 몰라도 사용 가능
- * 
+ *
  * 주요 역할:
  * 1. react-hook-form 인스턴스 생성 및 관리
  * 2. 폼 상태 관리 (값, 에러, 제출 상태 등)
@@ -9,7 +9,7 @@
  * 4. 자동 제출, onChange 콜백 등 부가 기능 처리
  */
 
-import React, { createContext, useContext, useMemo, useCallback, useEffect, useState } from 'react';
+import React, { createContext, useContext, useMemo, useCallback, useEffect, useState, useImperativeHandle } from 'react';
 import { useForm, FieldValues as RHFFieldValues, UseFormReturn } from 'react-hook-form';
 import {
   SearchContextValue,
@@ -32,10 +32,11 @@ const SearchContext = createContext<SearchContextValue | null>(null);
 /**
  * SearchProvider 컴포넌트
  * react-hook-form을 내부에서 관리하고 추상화된 API 제공
- * 
+ *
  * @param config - 검색 폼 설정 (필드 정의, 제출 핸들러, 자동 제출 설정 등)
  * @param children - 하위 컴포넌트들 (Field, SearchButtons 등)
  * @param initialValues - 초기값 (URL이나 localStorage에서 복원된 값 등)
+ * @param formRef - 외부에서 폼 API에 접근하기 위한 ref
  */
 export const SearchProvider: React.FC<SearchProviderProps> = ({
   config,
@@ -45,6 +46,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
   children,
   initialValues,
   onDepends,
+  formRef,
 }) => {
   /**
    * 동적 필드 메타 상태
@@ -430,6 +432,25 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
     };
   }, [config.autoSubmit, config.autoSubmitDelay, formAPI, watch]);
 
+  /**
+   * formRef를 통해 외부에 formAPI 노출
+   * useImperativeHandle을 사용하여 ref에 formAPI를 할당
+   *
+   * 이를 통해 SearchProvider 외부에서도 폼을 제어할 수 있음
+   *
+   * @example
+   * const formRef = useRef<SearchFormAPI>(null);
+   * <SearchProvider formRef={formRef} config={config}>
+   *   ...
+   * </SearchProvider>
+   *
+   * // 외부에서 폼 제어
+   * formRef.current?.getValues();
+   * formRef.current?.setValue('field', 'value');
+   * formRef.current?.submit();
+   */
+  useImperativeHandle(formRef, () => formAPI, [formAPI]);
+
   // Context 값
   // 하위 컴포넌트들이 useSearchContext를 통해 접근할 수 있는 값들
   const contextValue: SearchContextValue = useMemo(
@@ -437,7 +458,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
       config,          // 검색 폼 설정
       form: formAPI,   // 추상화된 폼 API
       getFieldMeta,    // 필드 메타 정보 조회 함수
-      
+
       // react-hook-form 인스턴스는 내부용으로만 사용
       // 사용자는 이 _internal에 직접 접근하지 않고, 우리가 제공하는 훅을 통해서만 사용
       _internal: {
