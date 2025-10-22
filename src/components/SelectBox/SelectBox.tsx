@@ -179,7 +179,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
     control: (provided, state) => ({
       ...provided,
       minHeight: '30px',
-      height: '30px',
+      height: isMulti ? 'auto' : '30px',
       borderColor: error
         ? 'var(--color-error, #dc3545)'
         : state.isFocused
@@ -198,10 +198,42 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
     }),
     valueContainer: (provided) => ({
       ...provided,
-      height: '30px',
-      padding: '0 8px',
+      minHeight: '30px',
+      height: isMulti ? 'auto' : '30px',
+      padding: isMulti ? '2px 8px' : '0 8px',
       display: 'flex',
       alignItems: 'center',
+      gap: isMulti ? '4px' : '0',
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      margin: '0',
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: 'var(--color-primary-light, #e7f1ff)',
+      borderRadius: '3px',
+      fontSize: '0.875rem',
+      height: '22px',
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      padding: '0 6px',
+      fontSize: '0.875rem',
+      color: 'var(--color-primary, #0d6efd)',
+      display: 'flex',
+      alignItems: 'center',
+    }),
+    multiValueRemove: (provided) => ({
+      ...provided,
+      padding: '0 4px',
+      cursor: 'pointer',
+      color: 'var(--color-primary, #0d6efd)',
+      display: 'flex',
+      alignItems: 'center',
+      '&:hover': {
+        backgroundColor: 'var(--color-primary, #0d6efd)',
+        color: '#fff',
+      },
     }),
     input: (provided) => ({
       ...provided,
@@ -210,7 +242,16 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
     }),
     indicatorsContainer: (provided) => ({
       ...provided,
-      height: '30px',
+      height: isMulti ? 'auto' : '30px',
+      alignItems: 'center',
+    }),
+    clearIndicator: (provided) => ({
+      ...provided,
+      padding: '4px',
+    }),
+    dropdownIndicator: (provided) => ({
+      ...provided,
+      padding: '4px',
     }),
     option: (provided, state) => ({
       ...provided,
