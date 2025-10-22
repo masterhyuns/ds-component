@@ -12,6 +12,7 @@ export { SearchButtons } from './components/SearchButtons';
 export { TextField } from './components/fields/TextField';
 export { SelectField } from './components/fields/SelectField';
 export { SelectBox } from './components/SelectBox';
+export { DatePicker } from './components/DatePicker';
 
 // 레이아웃 컴포넌트
 export { Grid, GridItem } from './components/Grid';
@@ -42,8 +43,9 @@ export type {
   SearchContextValue,
 } from './types/search.types';
 
-// SelectBox 타입
+// 독립 컴포넌트 타입
 export type { SelectBoxProps } from './components/SelectBox';
+export type { DatePickerProps } from './components/DatePicker';
 
 // Grid 레이아웃 타입
 export type {
