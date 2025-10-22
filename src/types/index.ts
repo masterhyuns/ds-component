@@ -21,10 +21,11 @@ export type FieldValues = Record<string, any>;
  * 검색 필드 타입
  * 지원하는 필드 타입 목록
  */
-export type SearchFieldType = 
+export type SearchFieldType =
   | 'text'           // 텍스트 입력
-  | 'select'         // 단일 선택
-  | 'multiselect'    // 다중 선택
+  | 'select'         // 단일 선택 (네이티브)
+  | 'react-select'   // react-select 기반 선택 (검색, single/multiple 지원)
+  | 'multiselect'    // 다중 선택 (네이티브)
   | 'date'           // 날짜 선택
   | 'daterange'      // 날짜 범위
   | 'number'         // 숫자 입력
@@ -111,6 +112,12 @@ export interface FieldMeta {
   options?: Option[];
   /** 비동기 옵션 로드 함수 */
   loadOptions?: (query: string) => Promise<Option[]>;
+  /** Multiple 선택 여부 (react-select 등에서 사용) */
+  isMulti?: boolean;
+  /** 검색 가능 여부 (react-select 등에서 사용, 기본: true) */
+  isSearchable?: boolean;
+  /** Clear 버튼 표시 여부 (react-select 등에서 사용, 기본: true) */
+  isClearable?: boolean;
   /** 그리드 컬럼 span */
   colSpan?: number;
   /** 렌더링 순서 */

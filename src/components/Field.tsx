@@ -21,6 +21,7 @@ import { useSearchContext } from '../context/SearchContext';
 import { FieldComponentProps } from '../types/search.types';
 import { TextField } from './fields/TextField';
 import { SelectField } from './fields/SelectField';
+import { ReactSelectField } from './fields/ReactSelectField';
 import { DateField } from './fields/DateField';
 import { DateRangeField } from './fields/DateRangeField';
 import { withFieldProps } from '../hoc/withFieldProps';
@@ -39,11 +40,12 @@ const defaultFieldComponents: Record<string, React.ComponentType<any>> = {
   // 기본 입력 필드들 (표준 props 사용)
   text: withFieldProps(TextField, 'text'),
   select: withFieldProps(SelectField, 'select'),
-  
+  'react-select': withFieldProps(ReactSelectField, 'react-select'),
+
   // 날짜 관련 필드들
   date: withFieldProps(DateField, 'date'),
   daterange: withFieldProps(DateRangeField, 'daterange'),
-  
+
   // TODO: 추가 필드 타입 컴포넌트 (HOC로 래핑 예정)
   // number: withFieldProps(NumberField, 'number'),
   // numberrange: withFieldProps(NumberRangeField, 'numberrange'),

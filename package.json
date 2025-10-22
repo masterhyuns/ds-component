@@ -19,6 +19,7 @@
     "react-datepicker": "^8.7.0",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.62.0",
+    "react-select": "^5.10.2",
     "swiper": "^11.2.10"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/react": "^19.1.12",
     "@types/react-datepicker": "^7.0.0",
     "@types/react-dom": "^19.1.9",
+    "@types/react-select": "^5.0.1",
     "@vitejs/plugin-react": "^4.7.0",
     "sass": "^1.92.1",
     "storybook": "^8.6.11",
