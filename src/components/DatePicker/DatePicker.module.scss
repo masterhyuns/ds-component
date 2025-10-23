@@ -271,6 +271,16 @@
   }
 }
 
+// 달력 하단 Today 버튼 컨테이너
+.calendarFooter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 12px;
+  border-top: 1px solid var(--color-border, #ced4da);
+  background-color: var(--color-background, #fff);
+}
+
 // react-datepicker 캘린더 스타일 커스터마이징
 :global {
   .react-datepicker {

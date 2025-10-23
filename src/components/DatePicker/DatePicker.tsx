@@ -144,6 +144,7 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onKeyDown={handleKeyDown}
+          onClick={onClick}
           onFocus={onFocus}
           placeholder={placeholder}
           disabled={disabled}
@@ -178,7 +179,7 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
 
 /**
  * 커스텀 캘린더 헤더
- * < 월 Select, 년 Select, Today >
+ * < 월 Select, 년 Select >
  */
 interface CustomHeaderProps {
   date: Date;
@@ -217,15 +218,6 @@ const CustomCalendarHeader: React.FC<CustomHeaderProps> = ({
   // 년도 범위: 현재 년도 기준 -100년 ~ +10년
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 111 }, (_, i) => currentYear - 100 + i);
-
-  /**
-   * 오늘 날짜로 이동
-   */
-  const handleTodayClick = () => {
-    const today = new Date();
-    changeYear(today.getFullYear());
-    changeMonth(today.getMonth());
-  };
 
   return (
     <div className={styles.customHeader}>
@@ -271,10 +263,6 @@ const CustomCalendarHeader: React.FC<CustomHeaderProps> = ({
             </option>
           ))}
         </select>
-
-        <button type="button" onClick={handleTodayClick} className={styles.todayButton} aria-label="오늘">
-          Today
-        </button>
       </div>
 
       <button
@@ -631,6 +619,27 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     }
   };
 
+  /**
+   * Today 버튼 클릭 핸들러
+   * 오늘 날짜를 선택
+   */
+  const handleTodayClick = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const newValue: Date | null | [Date | null, Date | null] = isRange ? [today, today] : today;
+
+    // Uncontrolled 모드에서는 내부 state 업데이트
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+
+    // onChange 콜백 호출
+    if (onChange) {
+      onChange(newValue);
+    }
+  };
+
   return (
     <div className={`${styles.datePicker} ${className || ''}`}>
       {label && (
@@ -676,7 +685,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 onManualInput={handleManualInput}
               />
             }
-          />
+          >
+            <div className={styles.calendarFooter}>
+              <button
+                type="button"
+                onClick={handleTodayClick}
+                className={styles.todayButton}
+                aria-label="오늘 날짜 선택"
+              >
+                Today
+              </button>
+            </div>
+          </ReactDatePicker>
         ) : (
           <ReactDatePicker
             id={id}
@@ -709,7 +729,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 onManualInput={handleManualInput}
               />
             }
-          />
+          >
+            <div className={styles.calendarFooter}>
+              <button
+                type="button"
+                onClick={handleTodayClick}
+                className={styles.todayButton}
+                aria-label="오늘 날짜 선택"
+              >
+                Today
+              </button>
+            </div>
+          </ReactDatePicker>
         )}
       </div>
 
