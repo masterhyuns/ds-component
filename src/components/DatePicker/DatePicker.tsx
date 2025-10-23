@@ -16,7 +16,6 @@ import styles from './DatePicker.module.scss';
 interface CustomInputProps {
   value?: string;
   onClick?: () => void;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur?: () => void;
   onFocus?: () => void;
   placeholder?: string;
@@ -34,7 +33,6 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
     {
       value,
       onClick,
-      onChange,
       onBlur,
       onFocus,
       placeholder,
@@ -64,15 +62,12 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
 
     /**
      * Input 값 변경 핸들러 (직접 입력)
+     * onChange는 호출하지 않음 - 캘린더 클릭 시에만 react-datepicker가 자동 호출
+     * 직접 입력은 onBlur에서 handleManualInput으로 처리
      */
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setInputValue(newValue);
-
-      // react-datepicker의 onChange도 호출 (기본 동작 유지)
-      if (onChange) {
-        onChange(e);
-      }
     };
 
     /**
