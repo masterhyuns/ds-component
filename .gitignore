@@ -1,3 +1,11 @@
 node_modules
 
 ./node_modules
+
+# Build outputs
+dist
+storybook-static
+
+# Cache directories
+.storybook-cache
+node_modules/.cache
