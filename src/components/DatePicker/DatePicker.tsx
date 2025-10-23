@@ -78,9 +78,14 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
      * 사용자가 직접 타이핑한 경우에만 파싱 실행 (캘린더 클릭 시 blur는 무시)
      */
     const handleInputBlur = () => {
+      console.log('[CustomInput handleInputBlur] inputValue:', inputValue, 'isUserTyping:', isUserTyping);
+
       // 직접 입력한 경우에만 파싱 실행
       if (onManualInput && inputValue && isUserTyping) {
+        console.log('[CustomInput] Calling onManualInput with:', inputValue);
         onManualInput(inputValue);
+      } else {
+        console.log('[CustomInput] Skipping onManualInput - isUserTyping:', isUserTyping);
       }
 
       // typing 플래그 리셋
@@ -404,14 +409,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({
    * react-datepicker의 onChange는 단일/범위에 따라 다른 타입 반환
    */
   const handleDatePickerChange = (date: Date | [Date | null, Date | null] | null) => {
+    console.log('[DatePicker handleDatePickerChange] Received:', date, 'Type:', Array.isArray(date) ? 'Array' : typeof date);
+    console.log('[DatePicker] isRange:', isRange);
+    console.log('[DatePicker] currentValue before:', currentValue);
+
     let newValue: Date | null | [Date | null, Date | null];
 
     if (isRange) {
       // 범위 선택 모드
       if (Array.isArray(date)) {
         newValue = date;
+        console.log('[Range] Array received:', newValue);
       } else {
         newValue = [date, null];
+        console.log('[Range] Single date received, converting to:', newValue);
       }
     } else {
       // 단일 선택 모드
@@ -422,13 +433,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       }
     }
 
+    console.log('[DatePicker] Final newValue:', newValue);
+
     // Uncontrolled 모드에서는 내부 state 업데이트
     if (!isControlled) {
+      console.log('[DatePicker] Updating internal state');
       setInternalValue(newValue);
     }
 
     // onChange 콜백 호출
     if (onChange) {
+      console.log('[DatePicker] Calling onChange with:', newValue);
       onChange(newValue);
     }
   };
