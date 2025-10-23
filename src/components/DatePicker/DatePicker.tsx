@@ -5,7 +5,7 @@
  * SearchProvider나 Field 없이도 사용 가능한 일반 컴포넌트
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { DatePickerProps } from './types';
@@ -61,6 +61,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onBlur,
   onFocus,
 }) => {
+  // ReactDatePicker ref (캘린더 제어용)
+  const datePickerRef = useRef<ReactDatePicker>(null);
+
   // Uncontrolled 모드를 위한 내부 state
   const [internalValue, setInternalValue] = useState<Date | null | [Date | null, Date | null]>(
     defaultValue || (isRange ? [null, null] : null)
@@ -285,7 +288,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
   /**
    * Today 버튼 클릭 핸들러
-   * 오늘 날짜를 선택
+   * 오늘 날짜를 선택하고 캘린더 뷰를 오늘 날짜의 년월로 이동
    */
   const handleTodayClick = () => {
     const today = new Date();
@@ -302,6 +305,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     if (onChange) {
       onChange(newValue);
     }
+
+    // 캘린더 뷰를 오늘 날짜의 년월로 이동시키기 위해 캘린더를 닫았다가 다시 열기
+    if (datePickerRef.current) {
+      datePickerRef.current.setOpen(false);
+      setTimeout(() => {
+        datePickerRef.current?.setOpen(true);
+      }, 0);
+    }
   };
 
   return (
@@ -316,6 +327,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       <div className={styles.inputWrapper}>
         {isRange ? (
           <ReactDatePicker
+            ref={datePickerRef}
             id={id}
             name={name}
             selected={currentStartDate}
@@ -363,6 +375,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           </ReactDatePicker>
         ) : (
           <ReactDatePicker
+            ref={datePickerRef}
             id={id}
             name={name}
             selected={currentSingleValue}
