@@ -173,6 +173,82 @@
   margin-top: 0.25rem;
 }
 
+// 커스텀 캘린더 헤더 스타일
+.customHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--color-primary-light, #e7f1ff);
+  border-bottom: 1px solid var(--color-border, #ced4da);
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-primary, #0d6efd);
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(13, 110, 253, 0.1);
+  }
+
+  &:disabled {
+    color: var(--color-text-disabled, #adb5bd);
+    cursor: not-allowed;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yearSelect,
+.monthSelect {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary, #0d6efd);
+  background-color: #fff;
+  border: 1px solid var(--color-border, #ced4da);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out;
+
+  &:hover {
+    border-color: var(--color-primary, #0d6efd);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary, #0d6efd);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  }
+}
+
+.yearSelect {
+  width: 80px;
+}
+
+.monthSelect {
+  width: 70px;
+}
+
 // react-datepicker 캘린더 스타일 커스터마이징
 :global {
   .react-datepicker {

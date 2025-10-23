@@ -56,8 +56,6 @@ export const ControlledBasic: Story = {
             placeholder="날짜를 선택하세요"
             value={date}
             onChange={(value) => setDate(value as Date | null)}
-            showYearDropdown
-            showMonthDropdown
           />
 
           <div style={{ marginTop: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}>
@@ -410,8 +408,6 @@ export const CombinedExample: Story = {
               label="프로젝트 시작일"
               value={formData.startDate}
               onChange={(value) => setFormData({ ...formData, startDate: value as Date | null })}
-              showYearDropdown
-              showMonthDropdown
             />
 
             <DatePicker
