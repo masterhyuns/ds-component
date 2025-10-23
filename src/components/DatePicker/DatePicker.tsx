@@ -25,18 +25,67 @@ interface CustomInputProps {
   id?: string;
   name?: string;
   onClear?: () => void;
+  onManualInput?: (inputValue: string) => void;
   error?: boolean;
 }
 
 const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
   (
-    { value, onClick, onChange, onBlur, onFocus, placeholder, disabled, className, id, name, onClear, error },
+    {
+      value,
+      onClick,
+      onChange,
+      onBlur,
+      onFocus,
+      placeholder,
+      disabled,
+      className,
+      id,
+      name,
+      onClear,
+      onManualInput,
+      error,
+    },
     ref
   ) => {
+    const [inputValue, setInputValue] = React.useState(value || '');
+
+    // value prop 변경 시 inputValue 동기화
+    React.useEffect(() => {
+      setInputValue(value || '');
+    }, [value]);
+
     const handleClear = (e: React.MouseEvent) => {
       e.stopPropagation();
       if (onClear && !disabled) {
         onClear();
+      }
+    };
+
+    /**
+     * Input 값 변경 핸들러 (직접 입력)
+     */
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setInputValue(newValue);
+
+      // react-datepicker의 onChange도 호출 (기본 동작 유지)
+      if (onChange) {
+        onChange(e);
+      }
+    };
+
+    /**
+     * Blur 핸들러: 직접 입력된 값 파싱 및 검증
+     */
+    const handleInputBlur = () => {
+      if (onManualInput && inputValue) {
+        onManualInput(inputValue);
+      }
+
+      // 기본 onBlur도 호출
+      if (onBlur) {
+        onBlur();
       }
     };
 
@@ -64,17 +113,15 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
         <input
           ref={ref}
           type="text"
-          value={value}
-          onClick={onClick}
-          onChange={onChange}
-          onBlur={onBlur}
+          value={inputValue}
+          onChange={handleInputChange}
+          onBlur={handleInputBlur}
           onFocus={onFocus}
           placeholder={placeholder}
           disabled={disabled}
           className={`${styles.customInput} ${error ? styles.inputError : ''} ${className || ''}`}
           id={id}
           name={name}
-          readOnly
         />
 
         {value && !disabled && (
@@ -400,6 +447,104 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     }
   };
 
+  /**
+   * 날짜 문자열 파싱 함수
+   * 다양한 형식을 지원: yyyy-MM-dd, yyyy/MM/dd, yyyy.MM.dd, yyyyMMdd
+   * 잘못된 형식이거나 유효하지 않은 날짜면 오늘 날짜 반환
+   */
+  const parseDateString = (inputStr: string): Date => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!inputStr || inputStr.trim() === '') {
+      return today;
+    }
+
+    // 공백 제거
+    const cleaned = inputStr.trim();
+
+    // 다양한 구분자 통일 (-, /, .)
+    const normalized = cleaned.replace(/[./]/g, '-');
+
+    // yyyy-MM-dd 형식으로 파싱 시도
+    let match = normalized.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+
+    // yyyyMMdd 형식 (구분자 없음)
+    if (!match) {
+      match = cleaned.match(/^(\d{4})(\d{2})(\d{2})$/);
+    }
+
+    if (!match) {
+      // 파싱 실패 시 오늘 날짜 반환
+      console.warn(`Invalid date format: "${inputStr}". Using today's date.`);
+      return today;
+    }
+
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10);
+    const day = parseInt(match[3], 10);
+
+    // 날짜 유효성 검증
+    const parsedDate = new Date(year, month - 1, day);
+    parsedDate.setHours(0, 0, 0, 0);
+
+    // 유효한 날짜인지 확인
+    if (
+      parsedDate.getFullYear() !== year ||
+      parsedDate.getMonth() !== month - 1 ||
+      parsedDate.getDate() !== day
+    ) {
+      console.warn(`Invalid date: "${inputStr}". Using today's date.`);
+      return today;
+    }
+
+    return parsedDate;
+  };
+
+  /**
+   * 직접 입력 핸들러
+   */
+  const handleManualInput = (inputStr: string) => {
+    if (isRange) {
+      // Range 모드: "2025-01-01 ~ 2025-01-31" 형식 지원
+      const parts = inputStr.split(/[\s~]+/).filter((p) => p.trim());
+
+      if (parts.length === 2) {
+        const startDate = parseDateString(parts[0]);
+        const endDate = parseDateString(parts[1]);
+        const newValue: [Date | null, Date | null] = [startDate, endDate];
+
+        if (!isControlled) {
+          setInternalValue(newValue);
+        }
+        if (onChange) {
+          onChange(newValue);
+        }
+      } else {
+        // 하나만 입력된 경우 시작일로 설정
+        const date = parseDateString(inputStr);
+        const newValue: [Date | null, Date | null] = [date, null];
+
+        if (!isControlled) {
+          setInternalValue(newValue);
+        }
+        if (onChange) {
+          onChange(newValue);
+        }
+      }
+    } else {
+      // Single 모드
+      const parsedDate = parseDateString(inputStr);
+
+      if (!isControlled) {
+        setInternalValue(parsedDate);
+      }
+      if (onChange) {
+        onChange(parsedDate);
+      }
+    }
+  };
+
   return (
     <div className={`${styles.datePicker} ${className || ''}`}>
       {label && (
@@ -442,6 +587,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 disabled={disabled}
                 error={!!error}
                 onClear={isClearable ? handleClear : undefined}
+                onManualInput={handleManualInput}
               />
             }
           />
@@ -474,6 +620,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
                 disabled={disabled}
                 error={!!error}
                 onClear={isClearable ? handleClear : undefined}
+                onManualInput={handleManualInput}
               />
             }
           />
