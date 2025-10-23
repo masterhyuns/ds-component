@@ -103,7 +103,7 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
 
 /**
  * 커스텀 캘린더 헤더
- * < 월 Select, 년 Select >
+ * < 월 Select, 년 Select, Today >
  */
 interface CustomHeaderProps {
   date: Date;
@@ -142,6 +142,15 @@ const CustomCalendarHeader: React.FC<CustomHeaderProps> = ({
   // 년도 범위: 현재 년도 기준 -100년 ~ +10년
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 111 }, (_, i) => currentYear - 100 + i);
+
+  /**
+   * 오늘 날짜로 이동
+   */
+  const handleTodayClick = () => {
+    const today = new Date();
+    changeYear(today.getFullYear());
+    changeMonth(today.getMonth());
+  };
 
   return (
     <div className={styles.customHeader}>
@@ -187,6 +196,10 @@ const CustomCalendarHeader: React.FC<CustomHeaderProps> = ({
             </option>
           ))}
         </select>
+
+        <button type="button" onClick={handleTodayClick} className={styles.todayButton} aria-label="오늘">
+          Today
+        </button>
       </div>
 
       <button

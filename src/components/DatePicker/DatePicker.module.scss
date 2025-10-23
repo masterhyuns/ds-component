@@ -249,6 +249,28 @@
   width: 70px;
 }
 
+.todayButton {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: var(--color-primary, #0d6efd);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: var(--color-primary-dark, #0a58ca);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
 // react-datepicker 캘린더 스타일 커스터마이징
 :global {
   .react-datepicker {
