@@ -165,16 +165,16 @@ SearchProvider는 react-hook-form을 완전히 캡슐화한 헤드리스 검색 
 ### 2. Render Prop 패턴
 
 ```jsx
-<Field name="keyword" render=&#123;(field) => (
-  <CustomInput &#123;...field&#125; />
-)&#125; />
+<Field name="keyword" render={(field) => (
+  <CustomInput {...field} />
+)} />
 ```
 
 ### 3. Children 함수 패턴
 
 ```jsx
 <Field name="keyword">
-  &#123;(field) => <CustomInput &#123;...field&#125; />&#125;
+  {(field) => <CustomInput {...field} />}
 </Field>
 ```
 
@@ -283,7 +283,7 @@ controller.getValues()                             // 전체 값 가져오기
 #### 예제 1: 국가/도시 선택
 
 ```jsx
-import type &#123; FieldDependencyHandler, FieldValues, FieldController &#125; from 'sd-search-box';
+import type { FieldDependencyHandler, FieldValues, FieldController } from 'sd-search-box';
 
 // Config는 순수하게 유지
 const config = {
@@ -366,13 +366,13 @@ const dependencies = {
 
 ```jsx
 // utils/searchDependencies.ts
-export const productSearchDependencies: Record<string, FieldDependencyHandler> = &#123;
-  city: &#123; /* ... */ &#125;,
-  discount: &#123; /* ... */ &#125;,
-&#125;;
+export const productSearchDependencies: Record<string, FieldDependencyHandler> = {
+  city: { /* ... */ },
+  discount: { /* ... */ },
+};
 
 // components/ProductSearch.tsx
-import &#123; productSearchDependencies &#125; from '@/utils/searchDependencies';
+import { productSearchDependencies } from '@/utils/searchDependencies';
 
 <SearchProvider config={config} onDepends={productSearchDependencies}>
   {/* ... */}
@@ -401,8 +401,8 @@ import &#123; productSearchDependencies &#125; from '@/utils/searchDependencies'
 #### 기본 사용법
 
 ```jsx
-import &#123; useRef &#125; from 'react';
-import type &#123; SearchFormAPI &#125; from 'sd-search-box';
+import { useRef } from 'react';
+import type { SearchFormAPI } from 'sd-search-box';
 
 function MyPage() {
   // 1. ref 생성
@@ -445,7 +445,7 @@ function MyPage() {
 ```jsx
 function MyPage() {
   const searchFormRef = useRef<SearchFormAPI>(null);
-  const [displayValues, setDisplayValues] = useState(&#123;&#125;);
+  const [displayValues, setDisplayValues] = useState({});
 
   return (
     <div>
@@ -528,14 +528,14 @@ formRef.current?.errors       // 에러 목록
 
 Before:
 ```jsx
-const &#123; register, handleSubmit, formState: &#123; errors &#125; &#125; = useForm();
-<input &#123;...register('keyword', &#123; required: true &#125;)&#125; />
+const { register, handleSubmit, formState: { errors } } = useForm();
+<input {...register('keyword', { required: true })} />
 ```
 
 After:
 ```jsx
 const field = useField('keyword');
-<input &#123;...field&#125; />
+<input {...field} />
 ```
 
 ## 문제 해결
