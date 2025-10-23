@@ -74,11 +74,11 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
     };
 
     /**
-     * Blur 핸들러: 직접 입력된 값 파싱 및 검증
-     * 사용자가 직접 타이핑한 경우에만 파싱 실행 (캘린더 클릭 시 blur는 무시)
+     * 직접 입력된 값 처리
+     * blur 또는 Enter 키 입력 시 호출
      */
-    const handleInputBlur = () => {
-      console.log('[CustomInput handleInputBlur] inputValue:', inputValue, 'isUserTyping:', isUserTyping);
+    const handleManualInputSubmit = () => {
+      console.log('[CustomInput handleManualInputSubmit] inputValue:', inputValue, 'isUserTyping:', isUserTyping);
 
       // 직접 입력한 경우에만 파싱 실행
       if (onManualInput && inputValue && isUserTyping) {
@@ -90,10 +90,29 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
 
       // typing 플래그 리셋
       setIsUserTyping(false);
+    };
+
+    /**
+     * Blur 핸들러: 직접 입력된 값 파싱 및 검증
+     * 사용자가 직접 타이핑한 경우에만 파싱 실행 (캘린더 클릭 시 blur는 무시)
+     */
+    const handleInputBlur = () => {
+      handleManualInputSubmit();
 
       // 기본 onBlur도 호출
       if (onBlur) {
         onBlur();
+      }
+    };
+
+    /**
+     * 키보드 이벤트 핸들러
+     * Enter 키 입력 시 직접 입력 처리
+     */
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleManualInputSubmit();
       }
     };
 
@@ -124,6 +143,7 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
           value={inputValue}
           onChange={handleInputChange}
           onBlur={handleInputBlur}
+          onKeyDown={handleKeyDown}
           onFocus={onFocus}
           placeholder={placeholder}
           disabled={disabled}
@@ -468,14 +488,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   /**
    * 날짜 문자열 파싱 함수
    * 다양한 형식을 지원: yyyy-MM-dd, yyyy/MM/dd, yyyy.MM.dd, yyyyMMdd
-   * 잘못된 형식이거나 유효하지 않은 날짜면 오늘 날짜 반환
+   *
+   * @returns { success: boolean, date: Date }
+   *   - success: true면 파싱 성공, false면 실패
+   *   - date: 파싱된 날짜 또는 실패 시 오늘 날짜
    */
-  const parseDateString = (inputStr: string): Date => {
+  const parseDateString = (inputStr: string): { success: boolean; date: Date } => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     if (!inputStr || inputStr.trim() === '') {
-      return today;
+      return { success: false, date: today };
     }
 
     // 공백 제거
@@ -493,9 +516,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     }
 
     if (!match) {
-      // 파싱 실패 시 오늘 날짜 반환
+      // 파싱 실패
       console.warn(`Invalid date format: "${inputStr}". Using today's date.`);
-      return today;
+      return { success: false, date: today };
     }
 
     const year = parseInt(match[1], 10);
@@ -513,14 +536,27 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       parsedDate.getDate() !== day
     ) {
       console.warn(`Invalid date: "${inputStr}". Using today's date.`);
-      return today;
+      return { success: false, date: today };
     }
 
-    return parsedDate;
+    return { success: true, date: parsedDate };
   };
 
   /**
    * 직접 입력 핸들러
+   *
+   * Range 모드 폴백 규칙:
+   * - 두 개 입력 (예: "2025-01-01 ~ 2025-01-31")
+   *   - start 성공, end 성공 → [startDate, endDate]
+   *   - start 실패, end 성공 → [endDate, endDate]
+   *   - start 성공, end 실패 → [startDate, startDate]
+   *   - start 실패, end 실패 → [today, today]
+   * - 하나 입력 (예: "2025-01-01")
+   *   - 파싱 성공 → [date, null]
+   *   - 파싱 실패 → [today, today]
+   *
+   * Single 모드:
+   * - 파싱 실패 시 오늘 날짜 (parseDateString에서 처리)
    */
   const handleManualInput = (inputStr: string) => {
     if (isRange) {
@@ -528,9 +564,32 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       const parts = inputStr.split(/[\s~]+/).filter((p) => p.trim());
 
       if (parts.length === 2) {
-        const startDate = parseDateString(parts[0]);
-        const endDate = parseDateString(parts[1]);
-        const newValue: [Date | null, Date | null] = [startDate, endDate];
+        // 두 개 입력된 경우
+        const startResult = parseDateString(parts[0]);
+        const endResult = parseDateString(parts[1]);
+
+        let finalStartDate: Date;
+        let finalEndDate: Date;
+
+        if (startResult.success && endResult.success) {
+          // 둘 다 성공
+          finalStartDate = startResult.date;
+          finalEndDate = endResult.date;
+        } else if (!startResult.success && endResult.success) {
+          // start 실패, end 성공 → end를 start에도 사용
+          finalStartDate = endResult.date;
+          finalEndDate = endResult.date;
+        } else if (startResult.success && !endResult.success) {
+          // start 성공, end 실패 → start를 end에도 사용
+          finalStartDate = startResult.date;
+          finalEndDate = startResult.date;
+        } else {
+          // 둘 다 실패 → 오늘 날짜
+          finalStartDate = startResult.date; // 이미 today
+          finalEndDate = endResult.date; // 이미 today
+        }
+
+        const newValue: [Date | null, Date | null] = [finalStartDate, finalEndDate];
 
         if (!isControlled) {
           setInternalValue(newValue);
@@ -539,9 +598,18 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           onChange(newValue);
         }
       } else {
-        // 하나만 입력된 경우 시작일로 설정
-        const date = parseDateString(inputStr);
-        const newValue: [Date | null, Date | null] = [date, null];
+        // 하나만 입력된 경우
+        const result = parseDateString(inputStr);
+
+        let newValue: [Date | null, Date | null];
+
+        if (result.success) {
+          // 파싱 성공 → [date, null]
+          newValue = [result.date, null];
+        } else {
+          // 파싱 실패 → [today, today]
+          newValue = [result.date, result.date];
+        }
 
         if (!isControlled) {
           setInternalValue(newValue);
@@ -551,14 +619,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({
         }
       }
     } else {
-      // Single 모드
-      const parsedDate = parseDateString(inputStr);
+      // Single 모드: 파싱 실패 시 오늘 날짜 (parseDateString에서 처리)
+      const result = parseDateString(inputStr);
 
       if (!isControlled) {
-        setInternalValue(parsedDate);
+        setInternalValue(result.date);
       }
       if (onChange) {
-        onChange(parsedDate);
+        onChange(result.date);
       }
     }
   };
