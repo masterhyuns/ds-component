@@ -14,21 +14,15 @@ import styles from './DatePicker.module.scss';
  * DatePicker Props
  */
 export interface DatePickerProps {
-  /** 현재 선택된 날짜 (controlled) */
-  value?: Date | null;
-  /** 기본 선택 날짜 (uncontrolled) */
-  defaultValue?: Date | null;
-  /** 날짜 변경 핸들러 */
-  onChange?: (date: Date | null) => void;
+  /** 현재 선택된 날짜 (controlled) - Single: Date | null, Range: [Date | null, Date | null] */
+  value?: Date | null | [Date | null, Date | null];
+  /** 기본 선택 날짜 (uncontrolled) - Single: Date | null, Range: [Date | null, Date | null] */
+  defaultValue?: Date | null | [Date | null, Date | null];
+  /** 날짜 변경 핸들러 - isRange에 따라 타입이 자동으로 결정됨 */
+  onChange?: (value: Date | null | [Date | null, Date | null]) => void;
 
   /** 범위 선택 모드 */
   isRange?: boolean;
-  /** 범위 선택 시작일 (controlled) */
-  startDate?: Date | null;
-  /** 범위 선택 종료일 (controlled) */
-  endDate?: Date | null;
-  /** 범위 변경 핸들러 */
-  onRangeChange?: (dates: [Date | null, Date | null]) => void;
 
   /** 라벨 */
   label?: string;
@@ -100,24 +94,14 @@ export interface DatePickerProps {
  *
  * @example
  * // 날짜 범위 선택
- * <DatePicker
- *   isRange
- *   startDate={startDate}
- *   endDate={endDate}
- *   onRangeChange={([start, end]) => {
- *     setStartDate(start);
- *     setEndDate(end);
- *   }}
- * />
+ * const [dates, setDates] = useState<[Date | null, Date | null]>([null, null]);
+ * <DatePicker value={dates} onChange={setDates} isRange />
  */
 export const DatePicker: React.FC<DatePickerProps> = ({
   value: controlledValue,
   defaultValue,
   onChange,
   isRange = false,
-  startDate: controlledStartDate,
-  endDate: controlledEndDate,
-  onRangeChange,
   label,
   placeholder = '날짜를 선택하세요',
   error,
@@ -143,70 +127,51 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onFocus,
 }) => {
   // Uncontrolled 모드를 위한 내부 state
-  const [internalValue, setInternalValue] = useState<Date | null>(defaultValue || null);
-  const [internalStartDate, setInternalStartDate] = useState<Date | null>(controlledStartDate || null);
-  const [internalEndDate, setInternalEndDate] = useState<Date | null>(controlledEndDate || null);
+  const [internalValue, setInternalValue] = useState<Date | null | [Date | null, Date | null]>(
+    defaultValue || (isRange ? [null, null] : null)
+  );
 
   // Controlled vs Uncontrolled 모드 판단
   const isControlled = controlledValue !== undefined;
-  const isRangeControlled = controlledStartDate !== undefined || controlledEndDate !== undefined;
 
   // 현재 값
   const currentValue = isControlled ? controlledValue : internalValue;
-  const currentStartDate = isRangeControlled ? controlledStartDate : internalStartDate;
-  const currentEndDate = isRangeControlled ? controlledEndDate : internalEndDate;
 
-  /**
-   * 단일 날짜 변경 핸들러
-   */
-  const handleChange = (date: Date | null) => {
-    // Uncontrolled 모드에서는 내부 state 업데이트
-    if (!isControlled) {
-      setInternalValue(date);
-    }
-
-    // onChange 콜백 호출
-    if (onChange) {
-      onChange(date);
-    }
-  };
-
-  /**
-   * 범위 날짜 변경 핸들러
-   */
-  const handleRangeChange = (dates: [Date | null, Date | null]) => {
-    const [start, end] = dates;
-
-    // Uncontrolled 모드에서는 내부 state 업데이트
-    if (!isRangeControlled) {
-      setInternalStartDate(start);
-      setInternalEndDate(end);
-    }
-
-    // onRangeChange 콜백 호출
-    if (onRangeChange) {
-      onRangeChange([start, end]);
-    }
-  };
+  // Range 모드일 때 startDate, endDate 추출
+  const currentStartDate = isRange && Array.isArray(currentValue) ? currentValue[0] : null;
+  const currentEndDate = isRange && Array.isArray(currentValue) ? currentValue[1] : null;
+  const currentSingleValue = !isRange && !Array.isArray(currentValue) ? currentValue : null;
 
   /**
    * react-datepicker의 onChange는 단일/범위에 따라 다른 타입 반환
    */
   const handleDatePickerChange = (date: Date | [Date | null, Date | null] | null) => {
+    let newValue: Date | null | [Date | null, Date | null];
+
     if (isRange) {
       // 범위 선택 모드
       if (Array.isArray(date)) {
-        handleRangeChange(date);
+        newValue = date;
       } else {
-        handleRangeChange([date, null]);
+        newValue = [date, null];
       }
     } else {
       // 단일 선택 모드
       if (Array.isArray(date)) {
-        handleChange(date[0]);
+        newValue = date[0];
       } else {
-        handleChange(date);
+        newValue = date;
       }
+    }
+
+    // Uncontrolled 모드에서는 내부 state 업데이트
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+
+    // onChange 콜백 호출
+    if (onChange) {
+      onChange(newValue);
     }
   };
 
@@ -255,7 +220,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           <ReactDatePicker
             id={id}
             name={name}
-            selected={currentValue}
+            selected={currentSingleValue}
             onChange={handleDatePickerChange}
             disabled={disabled}
             placeholderText={placeholder}

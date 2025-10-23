@@ -55,7 +55,7 @@ export const ControlledBasic: Story = {
             label="생년월일"
             placeholder="날짜를 선택하세요"
             value={date}
-            onChange={setDate}
+            onChange={(value) => setDate(value as Date | null)}
             showYearDropdown
             showMonthDropdown
           />
@@ -94,8 +94,8 @@ export const DateRangeUncontrolled: Story = {
           label="기간"
           placeholder="시작일 ~ 종료일"
           isRange
-          onRangeChange={([start, end]) => {
-            console.log('범위:', start, '~', end);
+          onChange={(dates) => {
+            console.log('선택된 범위:', dates);
           }}
         />
         <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#666' }}>
@@ -112,14 +112,8 @@ export const DateRangeUncontrolled: Story = {
 export const DateRangeControlled: Story = {
   render: () => {
     const RangeExample = () => {
-      const [startDate, setStartDate] = useState<Date | null>(null);
-      const [endDate, setEndDate] = useState<Date | null>(null);
-
-      const handleRangeChange = (dates: [Date | null, Date | null]) => {
-        const [start, end] = dates;
-        setStartDate(start);
-        setEndDate(end);
-      };
+      const [dates, setDates] = useState<[Date | null, Date | null]>([null, null]);
+      const [startDate, endDate] = dates;
 
       return (
         <div>
@@ -127,9 +121,8 @@ export const DateRangeControlled: Story = {
             label="프로젝트 기간"
             placeholder="시작일 ~ 종료일"
             isRange
-            startDate={startDate}
-            endDate={endDate}
-            onRangeChange={handleRangeChange}
+            value={dates}
+            onChange={(value) => setDates(value as [Date | null, Date | null])}
             isClearable
           />
 
@@ -143,17 +136,13 @@ export const DateRangeControlled: Story = {
                   const today = new Date();
                   const nextWeek = new Date();
                   nextWeek.setDate(today.getDate() + 7);
-                  setStartDate(today);
-                  setEndDate(nextWeek);
+                  setDates([today, nextWeek]);
                 }}
                 style={{ marginRight: '0.5rem' }}
               >
                 오늘 ~ 일주일 후
               </button>
-              <button onClick={() => {
-                setStartDate(null);
-                setEndDate(null);
-              }}>
+              <button onClick={() => setDates([null, null])}>
                 초기화
               </button>
             </div>
@@ -179,7 +168,7 @@ export const WithTimeSelect: Story = {
           <DatePicker
             label="예약 일시"
             value={dateTime}
-            onChange={setDateTime}
+            onChange={(value) => setDateTime(value as Date | null)}
             showTimeSelect
             timeIntervals={30}
             dateFormat="yyyy-MM-dd"
@@ -213,7 +202,7 @@ export const WithMinMaxDate: Story = {
           <DatePicker
             label="예약 가능 날짜"
             value={date}
-            onChange={setDate}
+            onChange={(value) => setDate(value as Date | null)}
             minDate={today}
             maxDate={maxDate}
             placeholder="오늘부터 3개월 후까지"
@@ -256,7 +245,7 @@ export const WithExcludeDates: Story = {
           <DatePicker
             label="근무일 선택"
             value={date}
-            onChange={setDate}
+            onChange={(value) => setDate(value as Date | null)}
             excludeDates={excludedDates}
             placeholder="주말 제외"
           />
@@ -288,7 +277,7 @@ export const InlineCalendar: Story = {
           <DatePicker
             label="날짜 선택"
             value={date}
-            onChange={setDate}
+            onChange={(value) => setDate(value as Date | null)}
             inline
           />
 
@@ -312,7 +301,8 @@ export const WithError: Story = {
       const [date, setDate] = useState<Date | null>(null);
       const [error, setError] = useState('');
 
-      const handleChange = (newDate: Date | null) => {
+      const handleChange = (value: Date | null | [Date | null, Date | null]) => {
+        const newDate = value as Date | null;
         setDate(newDate);
         if (!newDate) {
           setError('날짜를 선택해주세요');
@@ -371,21 +361,21 @@ export const CustomFormat: Story = {
             <DatePicker
               label="yyyy-MM-dd 형식"
               value={date}
-              onChange={setDate}
+              onChange={(value) => setDate(value as Date | null)}
               dateFormat="yyyy-MM-dd"
             />
 
             <DatePicker
               label="MM/dd/yyyy 형식"
               value={date}
-              onChange={setDate}
+              onChange={(value) => setDate(value as Date | null)}
               dateFormat="MM/dd/yyyy"
             />
 
             <DatePicker
               label="yyyy년 MM월 dd일 형식"
               value={date}
-              onChange={setDate}
+              onChange={(value) => setDate(value as Date | null)}
               dateFormat="yyyy년 MM월 dd일"
             />
           </div>
@@ -419,7 +409,7 @@ export const CombinedExample: Story = {
             <DatePicker
               label="프로젝트 시작일"
               value={formData.startDate}
-              onChange={(date) => setFormData({ ...formData, startDate: date })}
+              onChange={(value) => setFormData({ ...formData, startDate: value as Date | null })}
               showYearDropdown
               showMonthDropdown
             />
@@ -427,7 +417,7 @@ export const CombinedExample: Story = {
             <DatePicker
               label="프로젝트 종료일"
               value={formData.endDate}
-              onChange={(date) => setFormData({ ...formData, endDate: date })}
+              onChange={(value) => setFormData({ ...formData, endDate: value as Date | null })}
               minDate={formData.startDate || undefined}
               disabled={!formData.startDate}
               placeholder={!formData.startDate ? '시작일을 먼저 선택하세요' : '종료일 선택'}
@@ -436,7 +426,7 @@ export const CombinedExample: Story = {
             <DatePicker
               label="회의 일시"
               value={formData.meetingDate}
-              onChange={(date) => setFormData({ ...formData, meetingDate: date })}
+              onChange={(value) => setFormData({ ...formData, meetingDate: value as Date | null })}
               showTimeSelect
               timeIntervals={30}
               dateFormat="yyyy-MM-dd"
