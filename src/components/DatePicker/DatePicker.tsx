@@ -47,10 +47,12 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
     ref
   ) => {
     const [inputValue, setInputValue] = React.useState(value || '');
+    const [isUserTyping, setIsUserTyping] = React.useState(false);
 
     // value prop 변경 시 inputValue 동기화
     React.useEffect(() => {
       setInputValue(value || '');
+      setIsUserTyping(false); // 외부에서 value 변경 시 typing 플래그 리셋
     }, [value]);
 
     const handleClear = (e: React.MouseEvent) => {
@@ -68,15 +70,21 @@ const CustomInputWithIcons = forwardRef<HTMLInputElement, CustomInputProps>(
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setInputValue(newValue);
+      setIsUserTyping(true); // 사용자가 직접 타이핑 중임을 표시
     };
 
     /**
      * Blur 핸들러: 직접 입력된 값 파싱 및 검증
+     * 사용자가 직접 타이핑한 경우에만 파싱 실행 (캘린더 클릭 시 blur는 무시)
      */
     const handleInputBlur = () => {
-      if (onManualInput && inputValue) {
+      // 직접 입력한 경우에만 파싱 실행
+      if (onManualInput && inputValue && isUserTyping) {
         onManualInput(inputValue);
       }
+
+      // typing 플래그 리셋
+      setIsUserTyping(false);
 
       // 기본 onBlur도 호출
       if (onBlur) {
