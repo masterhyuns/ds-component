@@ -58,15 +58,17 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
   const [dynamicFieldMeta, setDynamicFieldMeta] = useState<Record<string, Partial<FieldMeta>>>({});
 
   // 기본값 설정
-  // initialValues와 필드별 defaultValue를 병합하여 최종 기본값 생성
-  // 우선순위: initialValues > field.defaultValue
+  // initialValues와 필드별 value를 병합하여 최종 기본값 생성
+  // 우선순위: initialValues > field.value > '' (빈 문자열)
   const defaultValues: FieldValues = useMemo(() => {
     const values: FieldValues = { ...initialValues };
 
-    // 각 필드의 defaultValue가 있고, initialValues에 해당 값이 없으면 추가
+    // 각 필드에 대해 기본값 설정
     config.fields.forEach((field) => {
-      if (field.defaultValue !== undefined && values[field.name] === undefined) {
-        values[field.name] = field.defaultValue;
+      // initialValues에 값이 없을 때만 처리
+      if (values[field.name] === undefined) {
+        // field.value가 있으면 사용, 없으면 빈 문자열
+        values[field.name] = field.value !== undefined ? field.value : '';
       }
     });
 
@@ -368,6 +370,13 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
   const isInitialMountRef = useRef(true);
 
   /**
+   * 이전 필드 값 저장용 ref
+   * 실제 값이 변경되었는지 비교하기 위해 사용
+   * 같은 값으로 재설정 시 불필요한 핸들러 호출 방지
+   */
+  const previousValuesRef = useRef<FieldValues>({});
+
+  /**
    * onDepends와 fieldController가 변경될 때마다 ref 업데이트
    * 이렇게 하면 watch 콜백에서 항상 최신 값을 참조할 수 있음
    */
@@ -428,11 +437,13 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
    * - useRef로 onDepends와 fieldController의 최신 값 참조
    * - watch는 한 번만 구독하고 재구독 방지
    * - 의존성 배열에서 onDepends와 fieldController 제거
+   * - 실제 값이 변경된 경우에만 핸들러 호출 (같은 값 재설정 시 무시)
    *
    * 동작 방식:
    * 1. watch를 통해 모든 필드 변경 감지
-   * 2. 변경된 필드에 의존하는 핸들러만 찾아서 실행
-   * 3. ref를 통해 항상 최신 onDepends와 fieldController 사용
+   * 2. 이전 값과 비교하여 실제로 변경되었는지 확인
+   * 3. 변경된 필드에 의존하는 핸들러만 찾아서 실행
+   * 4. ref를 통해 항상 최신 onDepends와 fieldController 사용
    *
    * @example
    * onDepends={{
@@ -463,14 +474,25 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({
       // onDepends가 없거나 변경된 필드명이 없으면 무시
       if (!currentOnDepends || !name) return;
 
-      // 변경된 필드에 의존하는 모든 핸들러 찾아서 실행
-      Object.entries(currentOnDepends).forEach(([, handler]) => {
-        // dependencies에 변경된 필드가 포함되어 있는지 확인
-        if (handler.dependencies.includes(name)) {
-          // 핸들러 실행: 현재 폼 값과 최신 필드 컨트롤러 전달
-          handler.handler(values, currentFieldController);
-        }
-      });
+      // 실제 값이 변경되었는지 확인
+      const previousValue = previousValuesRef.current[name];
+      const currentValue = values[name];
+
+      // 값이 실제로 변경된 경우에만 처리
+      // 같은 값으로 재설정 시 핸들러 호출 방지
+      if (previousValue !== currentValue) {
+        // 이전 값 업데이트
+        previousValuesRef.current[name] = currentValue;
+
+        // 변경된 필드에 의존하는 모든 핸들러 찾아서 실행
+        Object.entries(currentOnDepends).forEach(([, handler]) => {
+          // dependencies에 변경된 필드가 포함되어 있는지 확인
+          if (handler.dependencies.includes(name)) {
+            // 핸들러 실행: 현재 폼 값과 최신 필드 컨트롤러 전달
+            handler.handler(values, currentFieldController);
+          }
+        });
+      }
     });
 
     return () => subscription.unsubscribe();
