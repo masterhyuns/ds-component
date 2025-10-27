@@ -15,8 +15,22 @@ export const TextField: React.FC<FieldProps> = ({
   meta,
   disabled,
 }) => {
+  /**
+   * input type 결정
+   * meta.type이 'text' 또는 'number'일 경우 해당 타입 사용
+   * 기본값: 'text'
+   */
+  const inputType = meta?.type === 'number' ? 'number' : 'text';
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+    const newValue = e.target.value;
+
+    // number 타입인 경우 숫자로 변환, 빈 값이면 null 반환
+    if (inputType === 'number') {
+      onChange(newValue === '' ? null : Number(newValue));
+    } else {
+      onChange(newValue);
+    }
   };
 
   return (
@@ -29,14 +43,18 @@ export const TextField: React.FC<FieldProps> = ({
       )}
       <input
         id={meta?.id}
-        type="text"
-        value={value || ''}
+        type={inputType}
+        value={value ?? ''}
         onChange={handleChange}
         onBlur={onBlur}
         placeholder={meta?.placeholder}
         disabled={disabled || meta?.disabled}
         readOnly={meta?.readonly}
         className={`${styles.input} ${error ? styles.error : ''}`}
+        // number 타입일 때 추가 속성
+        min={inputType === 'number' ? meta?.validation?.min : undefined}
+        max={inputType === 'number' ? meta?.validation?.max : undefined}
+        step={inputType === 'number' ? meta?.config?.step : undefined}
       />
       {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
