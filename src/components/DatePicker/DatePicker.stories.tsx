@@ -402,14 +402,14 @@ export const PositionTest: Story = {
       const [date4, setDate4] = useState<Date | null>(null);
 
       return (
-        <div style={{ position: 'relative', minHeight: '600px', border: '2px dashed #ccc', padding: '1rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>DatePicker 위치 조절 테스트</h3>
-          <p style={{ marginBottom: '2rem', fontSize: '0.875rem', color: '#666' }}>
+        <div style={{ position: 'relative', minHeight: '600px', border: '2px dashed #ccc', padding: 0 }}>
+          <h3 style={{ margin: '1rem', marginBottom: '0.5rem' }}>DatePicker 위치 조절 테스트</h3>
+          <p style={{ margin: '0 1rem 1rem 1rem', fontSize: '0.875rem', color: '#666' }}>
             💡 각 위치에서 달력을 열어보세요. 공간이 부족하면 자동으로 위치가 조정됩니다.
           </p>
 
           {/* 좌측 상단 */}
-          <div style={{ position: 'absolute', top: '80px', left: '20px', width: '200px' }}>
+          <div style={{ position: 'absolute', top: '10px', left: '10px', width: '120px' }}>
             <DatePicker
               label="좌측 상단"
               value={date1}
@@ -419,7 +419,7 @@ export const PositionTest: Story = {
           </div>
 
           {/* 우측 상단 */}
-          <div style={{ position: 'absolute', top: '80px', right: '20px', width: '200px' }}>
+          <div style={{ position: 'absolute', top: '10px', right: '10px', width: '120px' }}>
             <DatePicker
               label="우측 상단"
               value={date2}
@@ -429,7 +429,7 @@ export const PositionTest: Story = {
           </div>
 
           {/* 좌측 하단 */}
-          <div style={{ position: 'absolute', bottom: '20px', left: '20px', width: '200px' }}>
+          <div style={{ position: 'absolute', bottom: '10px', left: '10px', width: '120px' }}>
             <DatePicker
               label="좌측 하단"
               value={date3}
@@ -439,7 +439,7 @@ export const PositionTest: Story = {
           </div>
 
           {/* 우측 하단 */}
-          <div style={{ position: 'absolute', bottom: '20px', right: '20px', width: '200px' }}>
+          <div style={{ position: 'absolute', bottom: '10px', right: '10px', width: '120px' }}>
             <DatePicker
               label="우측 하단"
               value={date4}
