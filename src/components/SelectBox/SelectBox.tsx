@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import Select, { MultiValue, SingleValue, Props as SelectProps } from 'react-select';
+import Select, { MultiValue, SingleValue, Props as SelectProps, components, MenuListProps } from 'react-select';
 import { Option } from '../../types/search.types';
 import styles from './SelectBox.module.scss';
 
@@ -49,6 +49,8 @@ export interface SelectBoxProps {
   isSearchable?: boolean;
   /** Clear 버튼 표시 여부 (기본: true) */
   isClearable?: boolean;
+  /** 전체 선택/해제 버튼 표시 여부 (isMulti일 때만, 기본: false) */
+  showSelectAll?: boolean;
 
   /** 커스텀 CSS 클래스 */
   className?: string;
@@ -107,6 +109,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
   isMulti = false,
   isSearchable = true,
   isClearable = true,
+  showSelectAll = false,
   className,
   id,
   name,
@@ -173,6 +176,71 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
   };
 
   /**
+   * 전체 선택 핸들러
+   */
+  const handleSelectAll = () => {
+    const allValues = selectOptions
+      .filter((opt) => !opt.isDisabled)
+      .map((opt) => opt.value);
+
+    // Uncontrolled 모드에서는 내부 state 업데이트
+    if (!isControlled) {
+      setInternalValue(allValues);
+    }
+
+    // onChange 콜백 호출
+    if (onChange) {
+      onChange(allValues);
+    }
+  };
+
+  /**
+   * 전체 해제 핸들러
+   */
+  const handleDeselectAll = () => {
+    // Uncontrolled 모드에서는 내부 state 업데이트
+    if (!isControlled) {
+      setInternalValue([]);
+    }
+
+    // onChange 콜백 호출
+    if (onChange) {
+      onChange([]);
+    }
+  };
+
+  /**
+   * 커스텀 MenuList 컴포넌트 (전체 선택/해제 버튼 포함)
+   */
+  const CustomMenuList = (props: MenuListProps<ReactSelectOption, boolean>) => {
+    return (
+      <>
+        {isMulti && showSelectAll && (
+          <div className={styles.selectAllButtons}>
+            <button
+              type="button"
+              className={styles.selectAllButton}
+              onClick={handleSelectAll}
+              onMouseDown={(e) => e.preventDefault()} // 메뉴 닫힘 방지
+            >
+              전체 선택
+            </button>
+            <button
+              type="button"
+              className={styles.deselectAllButton}
+              onClick={handleDeselectAll}
+              onMouseDown={(e) => e.preventDefault()} // 메뉴 닫힘 방지
+            >
+              전체 해제
+            </button>
+          </div>
+        )}
+        <components.MenuList {...props}>{props.children}</components.MenuList>
+      </>
+    );
+  };
+
+  /**
    * react-select 커스텀 스타일
    */
   const customStyles: SelectProps<ReactSelectOption>['styles'] = {
@@ -204,6 +272,8 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
       display: 'flex',
       alignItems: 'center',
       gap: isMulti ? '4px' : '0',
+      flexWrap: isMulti ? 'nowrap' : 'wrap', // 가로로 늘어나게
+      overflow: isMulti ? 'hidden' : 'visible', // 너비 초과 시 숨김
     }),
     multiValue: (provided) => ({
       ...provided,
@@ -307,6 +377,9 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
         styles={customStyles}
         className={styles.select}
         classNamePrefix="react-select"
+        components={{
+          MenuList: CustomMenuList,
+        }}
       />
 
       {error && <span className={styles.errorMessage}>{error}</span>}

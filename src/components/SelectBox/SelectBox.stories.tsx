@@ -182,6 +182,98 @@ export const MultipleControlled: Story = {
 };
 
 /**
+ * Multiple Select - 전체 선택/해제 기능
+ */
+export const MultipleWithSelectAll: Story = {
+  render: () => {
+    const SelectAllExample = () => {
+      const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+
+      return (
+        <div>
+          <SelectBox
+            label="프로그래밍 언어"
+            placeholder="언어를 선택하세요"
+            isMulti
+            showSelectAll  // 전체 선택/해제 버튼 활성화
+            value={selectedLanguages}
+            onChange={setSelectedLanguages}
+            options={[
+              { label: 'JavaScript', value: 'js' },
+              { label: 'TypeScript', value: 'ts' },
+              { label: 'Python', value: 'python' },
+              { label: 'Java', value: 'java' },
+              { label: 'C++', value: 'cpp' },
+              { label: 'Go', value: 'go' },
+              { label: 'Rust', value: 'rust' },
+              { label: 'Swift', value: 'swift' },
+              { label: 'Kotlin', value: 'kotlin' },
+              { label: 'Ruby', value: 'ruby' },
+            ]}
+          />
+
+          <div style={{ marginTop: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}>
+            <strong>선택된 언어 ({selectedLanguages.length}개):</strong>{' '}
+            {selectedLanguages.length > 0 ? selectedLanguages.join(', ') : '(없음)'}
+          </div>
+
+          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#666' }}>
+            💡 드롭다운을 열면 상단에 "전체 선택" / "전체 해제" 버튼이 표시됩니다
+          </p>
+        </div>
+      );
+    };
+
+    return <SelectAllExample />;
+  },
+};
+
+/**
+ * Multiple Select - 가로 스크롤 (overflow hidden)
+ */
+export const MultipleWithOverflow: Story = {
+  render: () => {
+    const OverflowExample = () => {
+      const [selectedItems, setSelectedItems] = useState<string[]>([
+        'item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7', 'item8'
+      ]);
+
+      return (
+        <div>
+          <div style={{ maxWidth: '400px' }}>
+            <SelectBox
+              label="많은 항목 선택"
+              placeholder="항목을 선택하세요"
+              isMulti
+              showSelectAll
+              value={selectedItems}
+              onChange={setSelectedItems}
+              options={Array.from({ length: 20 }, (_, i) => ({
+                label: `항목 ${i + 1}`,
+                value: `item${i + 1}`,
+              }))}
+            />
+          </div>
+
+          <div style={{ marginTop: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}>
+            <strong>선택된 항목 ({selectedItems.length}개):</strong>
+            <div style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
+              {selectedItems.join(', ')}
+            </div>
+          </div>
+
+          <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#666' }}>
+            💡 선택된 항목이 많을 때 가로로 늘어나며, 너비를 초과하면 숨겨집니다 (overflow: hidden)
+          </p>
+        </div>
+      );
+    };
+
+    return <OverflowExample />;
+  },
+};
+
+/**
  * 검색 기능 (대량 옵션)
  */
 export const WithSearch: Story = {

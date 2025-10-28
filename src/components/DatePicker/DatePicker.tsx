@@ -352,6 +352,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             onFocus={onFocus}
             calendarClassName={styles.calendar}
             wrapperClassName={styles.wrapper}
+            popperClassName={styles.popper}
             renderCustomHeader={(headerProps) => <CustomCalendarHeader {...headerProps} />}
             customInput={
               <CustomInputWithIcons
@@ -397,6 +398,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             onFocus={onFocus}
             calendarClassName={styles.calendar}
             wrapperClassName={styles.wrapper}
+            popperClassName={styles.popper}
             renderCustomHeader={(headerProps) => <CustomCalendarHeader {...headerProps} />}
             customInput={
               <CustomInputWithIcons

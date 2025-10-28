@@ -181,6 +181,9 @@
   padding: 8px 12px;
   background-color: var(--color-primary-light, #e7f1ff);
   border-bottom: 1px solid var(--color-border, #ced4da);
+  position: relative;
+  z-index: 1;
+  opacity: 1;
 }
 
 .navButton {
@@ -283,19 +286,38 @@
 
 // react-datepicker 캘린더 스타일 커스터마이징
 :global {
+  // DatePicker Popper z-index 설정 (다른 컴포넌트보다 위에 표시)
+  .react-datepicker-popper {
+    z-index: 9999 !important;
+  }
+
   .react-datepicker {
     font-family: inherit;
     font-size: 0.875rem;
     border-color: var(--color-border, #ced4da);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
   }
 
   .react-datepicker__header {
     background-color: var(--color-primary-light, #e7f1ff);
     border-bottom-color: var(--color-border, #ced4da);
+    padding: 0;
   }
 
-  .react-datepicker__current-month,
+  // renderCustomHeader 사용 시 기본 헤더 영역 숨김
+  .react-datepicker__header:not(.react-datepicker__header--time) {
+    .react-datepicker__current-month,
+    .react-datepicker__day-names {
+      padding-top: 0;
+    }
+  }
+
+  // 기본 current-month 텍스트 숨김 (커스텀 헤더 사용)
+  .react-datepicker__current-month {
+    display: none;
+  }
+
   .react-datepicker-time__header {
     color: var(--color-primary, #0d6efd);
     font-weight: 600;

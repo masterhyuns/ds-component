@@ -390,6 +390,156 @@ export const CustomFormat: Story = {
 };
 
 /**
+ * 위치 조절 테스트 (화면 끝에 배치)
+ * DatePicker가 브라우저 우측 끝, 좌측 끝, 상단, 하단에 있어도 달력이 잘 보이는지 테스트
+ */
+export const PositionTest: Story = {
+  render: () => {
+    const PositionTestComponent = () => {
+      const [date1, setDate1] = useState<Date | null>(null);
+      const [date2, setDate2] = useState<Date | null>(null);
+      const [date3, setDate3] = useState<Date | null>(null);
+      const [date4, setDate4] = useState<Date | null>(null);
+
+      return (
+        <div style={{ position: 'relative', minHeight: '600px', border: '2px dashed #ccc', padding: '1rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>DatePicker 위치 조절 테스트</h3>
+          <p style={{ marginBottom: '2rem', fontSize: '0.875rem', color: '#666' }}>
+            💡 각 위치에서 달력을 열어보세요. 공간이 부족하면 자동으로 위치가 조정됩니다.
+          </p>
+
+          {/* 좌측 상단 */}
+          <div style={{ position: 'absolute', top: '80px', left: '20px', width: '200px' }}>
+            <DatePicker
+              label="좌측 상단"
+              value={date1}
+              onChange={(value) => setDate1(value as Date | null)}
+              placeholder="좌측 상단"
+            />
+          </div>
+
+          {/* 우측 상단 */}
+          <div style={{ position: 'absolute', top: '80px', right: '20px', width: '200px' }}>
+            <DatePicker
+              label="우측 상단"
+              value={date2}
+              onChange={(value) => setDate2(value as Date | null)}
+              placeholder="우측 상단"
+            />
+          </div>
+
+          {/* 좌측 하단 */}
+          <div style={{ position: 'absolute', bottom: '20px', left: '20px', width: '200px' }}>
+            <DatePicker
+              label="좌측 하단"
+              value={date3}
+              onChange={(value) => setDate3(value as Date | null)}
+              placeholder="좌측 하단"
+            />
+          </div>
+
+          {/* 우측 하단 */}
+          <div style={{ position: 'absolute', bottom: '20px', right: '20px', width: '200px' }}>
+            <DatePicker
+              label="우측 하단"
+              value={date4}
+              onChange={(value) => setDate4(value as Date | null)}
+              placeholder="우측 하단"
+            />
+          </div>
+
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.875rem', color: '#999' }}>
+              네 모서리에 DatePicker가 배치되어 있습니다
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    return <PositionTestComponent />;
+  },
+};
+
+/**
+ * 세로 배치 테스트 (z-index 및 헤더 overlap 테스트)
+ * DatePicker 2개를 세로로 배치했을 때 달력/아이콘이 헤더와 겹치는지 확인
+ */
+export const VerticalStackTest: Story = {
+  render: () => {
+    const VerticalStackTestComponent = () => {
+      const [date1, setDate1] = useState<Date | null>(null);
+      const [date2, setDate2] = useState<Date | null>(null);
+      const [range, setRange] = useState<[Date | null, Date | null]>([null, null]);
+
+      return (
+        <div>
+          <h3 style={{ marginBottom: '1rem' }}>DatePicker 세로 배치 테스트</h3>
+          <p style={{ marginBottom: '2rem', fontSize: '0.875rem', color: '#666' }}>
+            💡 위쪽 DatePicker를 열었을 때 달력이 아래 DatePicker의 헤더/아이콘과 겹치지 않는지 확인하세요.
+          </p>
+
+          {/* 헤더 있는 영역 */}
+          <div style={{ background: '#f8f9fa', padding: '1rem', marginBottom: '1rem', borderRadius: '4px' }}>
+            <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>📋 폼 헤더 영역</h4>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#666' }}>
+              이 헤더 위로 달력이 올라오는지 확인
+            </p>
+          </div>
+
+          {/* DatePicker 세로 배치 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '400px' }}>
+            <DatePicker
+              label="첫 번째 날짜"
+              value={date1}
+              onChange={(value) => setDate1(value as Date | null)}
+              placeholder="첫 번째 날짜 선택"
+              isClearable
+            />
+
+            <DatePicker
+              label="두 번째 날짜"
+              value={date2}
+              onChange={(value) => setDate2(value as Date | null)}
+              placeholder="두 번째 날짜 선택"
+              isClearable
+            />
+
+            <DatePicker
+              label="날짜 범위"
+              isRange
+              value={range}
+              onChange={(value) => setRange(value as [Date | null, Date | null])}
+              placeholder="시작일 ~ 종료일"
+              isClearable
+            />
+          </div>
+
+          <div style={{ marginTop: '2rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}>
+            <strong>테스트 항목:</strong>
+            <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem', fontSize: '0.875rem' }}>
+              <li>첫 번째 DatePicker를 열었을 때 달력이 두 번째 DatePicker 위에 표시되는가?</li>
+              <li>달력이 헤더 영역 위에 표시되는가?</li>
+              <li>달력 아이콘과 X 버튼이 다른 요소와 겹치지 않는가?</li>
+              <li>z-index가 적절하게 설정되어 있는가?</li>
+            </ul>
+          </div>
+
+          <div style={{ marginTop: '1rem', padding: '1rem', background: '#fff3cd', borderRadius: '4px', border: '1px solid #ffc107' }}>
+            <strong>⚠️ 확인 포인트:</strong>
+            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>
+              커스텀 헤더의 배경이 투명하거나 z-index가 낮으면 아래 요소가 비칠 수 있습니다.
+            </p>
+          </div>
+        </div>
+      );
+    };
+
+    return <VerticalStackTestComponent />;
+  },
+};
+
+/**
  * 복합 예제
  */
 export const CombinedExample: Story = {
