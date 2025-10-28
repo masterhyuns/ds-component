@@ -353,26 +353,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             calendarClassName={styles.calendar}
             wrapperClassName={styles.wrapper}
             popperClassName={styles.popper}
-            popperModifiers={
-              [
-                {
-                  name: 'flip',
-                  enabled: true,
-                  options: {
-                    fallbackPlacements: ['top', 'bottom', 'right', 'left'],
-                  },
-                },
-                {
-                  name: 'preventOverflow',
-                  enabled: true,
-                  options: {
-                    rootBoundary: 'viewport',
-                    tether: false,
-                    altAxis: true,
-                  },
-                },
-              ] as any
-            }
             renderCustomHeader={(headerProps) => <CustomCalendarHeader {...headerProps} />}
             customInput={
               <CustomInputWithIcons
@@ -419,26 +399,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             calendarClassName={styles.calendar}
             wrapperClassName={styles.wrapper}
             popperClassName={styles.popper}
-            popperModifiers={
-              [
-                {
-                  name: 'flip',
-                  enabled: true,
-                  options: {
-                    fallbackPlacements: ['top', 'bottom', 'right', 'left'],
-                  },
-                },
-                {
-                  name: 'preventOverflow',
-                  enabled: true,
-                  options: {
-                    rootBoundary: 'viewport',
-                    tether: false,
-                    altAxis: true,
-                  },
-                },
-              ] as any
-            }
             renderCustomHeader={(headerProps) => <CustomCalendarHeader {...headerProps} />}
             customInput={
               <CustomInputWithIcons
